@@ -219,6 +219,8 @@ void PhysicsSystem::BasicCollisionDetection()
 			if (CollisionDetection::ObjectIntersection(*i, *j, info)) 
 			{
 				ImpulseResolveCollision(*info.a, *info.b, info.point);
+				//ResolveSpringCollision(*info.a, *info.b, info.point);
+
 				info.framesLeft = numCollisionFrames;
 				allCollisions.insert(info);
 			}
@@ -272,7 +274,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	Vector3::Cross(relativeB, p.normal), relativeB);
 	float angularEffect = Vector3::Dot(inertiaA + inertiaB, p.normal);
 	
-	float cRestitution = 0.66f; // disperse some kinectic energy
+	float cRestitution = a.GetPhysicsObject()->getElasticity() * b.GetPhysicsObject()->getElasticity(); // disperse some kinectic energy
 
 	float j = (-(1.0f + cRestitution) * impulseForce) / (totalMass + angularEffect);
 	
@@ -283,6 +285,30 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	
 	physA -> ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
 	physB -> ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
+
+
+}
+
+void PhysicsSystem::ResolveSpringCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const
+{
+
+	PhysicsObject* physA = a.GetPhysicsObject();
+	PhysicsObject* physB = b.GetPhysicsObject();
+
+	//float restingLength = 0;
+	float x = p.penetration;
+	float k = 1.0;
+
+	float F = -(k * x);
+
+	float sepForce = 300.0f;
+
+	//float magnitude = F * sepForce;
+
+	Vector3 applyForce = p.normal * F;// magnitude;
+
+	physA->AddForceAtPosition(-applyForce, p.localA);
+	physB->AddForceAtPosition(applyForce, p.localB);
 
 
 }

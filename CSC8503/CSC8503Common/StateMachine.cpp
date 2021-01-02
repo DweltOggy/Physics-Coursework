@@ -4,38 +4,60 @@
 
 using namespace NCL::CSC8503;
 
-StateMachine::StateMachine()
+StateMachine::StateMachine() 
 {
 	activeState = nullptr;
 }
 
-StateMachine::~StateMachine()
+StateMachine ::~StateMachine() 
 {
-}
+	for (auto& i : allStates) 
+	{
+		delete i;
+		
+	}
 
-void StateMachine::AddState(State* s) {
-	allStates.emplace_back(s);
-	if (activeState == nullptr) {
-		activeState = s;
+	for (auto& i : allTransitions) 
+	{
+		delete i.second;
+		
 	}
 }
 
-void StateMachine::AddTransition(StateTransition* t) {
-	allTransitions.insert(std::make_pair(t->GetSourceState(), t));
+void StateMachine::AddState(State* s)
+{
+	allStates.emplace_back(s);
+	if (activeState == nullptr) 
+	{
+		activeState = s; // make this the default entry state !
+	}
 }
 
-void StateMachine::Update() {
-	if (activeState) {
-		activeState->Update();
+void StateMachine::AddTransition(StateTransition * t) 
+{
+	allTransitions.insert(std::make_pair(t -> GetSourceState(), t));
 	
-		//Get the transition set starting from this state node;
-		std::pair<TransitionIterator, TransitionIterator> range = allTransitions.equal_range(activeState);
+}
 
-		for (auto& i = range.first; i != range.second; ++i) {
-			if (i->second->CanTransition()) {
-				State* newState = i->second->GetDestinationState();
+
+
+void StateMachine::Update(float dt) 
+{
+	if (activeState) 
+	{
+		activeState -> Update(dt);
+		// Get the transition set starting from this state node ;
+			std::pair < TransitionIterator, TransitionIterator > range =
+			allTransitions.equal_range(activeState);
+			
+			// Iterate through them all
+			for (auto& i = range.first; i != range.second; ++i)
+			{
+			if (i -> second -> CanTransition()) 
+			{ // some transition is true !
+				State * newState = i -> second -> GetDestinationState();
 				activeState = newState;
-			}
-		}
+			}	
+		}	
 	}
 }

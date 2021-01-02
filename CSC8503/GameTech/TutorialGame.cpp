@@ -17,6 +17,7 @@ TutorialGame::TutorialGame()	{
 	forceMagnitude	= 10.0f;
 	useGravity		= false;
 	inSelectionMode = false;
+	testStateObject = nullptr;
 
 	Debug::SetRenderer(renderer);
 
@@ -125,6 +126,10 @@ void TutorialGame::UpdateGame(float dt) {
 		gameOver = true;
 	}
 	//Vector2(10, 20)
+	if (testStateObject) 
+	{
+		testStateObject -> Update(dt);
+	}
 
 	world->UpdateWorld(dt);
 	renderer->Update(dt);
@@ -275,10 +280,13 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
-	//InitMixedGridWorld(5, 5, 3.5f, 3.5f);
+	InitMixedGridWorld(5, 5, 3.5f, 3.5f);
 	InitGameExamples();
 	InitDefaultFloor();
 	//BridgeConstraintTest();
+
+	testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
+
 }
 
 void TutorialGame::BridgeConstraintTest()
@@ -359,6 +367,8 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 
 	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, basicTex, basicShader));
 	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
+
+	sphere->GetPhysicsObject()->setElasticity(0.1);
 
 	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
 	sphere->GetPhysicsObject()->InitSphereInertia();
@@ -486,7 +496,7 @@ GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
 
 	world->AddGameObject(character);
 
-	lockedObject = character;
+	//lockedObject = character;
 
 	return character;
 }
@@ -539,6 +549,28 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 	return apple;
 }
 
+StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position)
+{
+	StateGameObject* apple = new StateGameObject();
+
+	SphereVolume* volume = new SphereVolume(0.25f);
+	apple->SetBoundingVolume((CollisionVolume*)volume);
+	apple->GetTransform()
+		.SetScale(Vector3(0.25, 0.25, 0.25))
+		.SetPosition(position);
+
+	apple->SetRenderObject(new RenderObject(&apple->GetTransform(), bonusMesh, nullptr, basicShader));
+	apple->SetPhysicsObject(new PhysicsObject(&apple->GetTransform(), apple->GetBoundingVolume()));
+
+	apple->GetPhysicsObject()->SetInverseMass(1.0f);
+	apple->GetPhysicsObject()->InitSphereInertia();
+
+	apple->SetWorldID(1);
+
+	world->AddGameObject(apple);
+
+	return apple;
+}
 /*
 
 Every frame, this code will let you perform a raycast, to see if there's an object
