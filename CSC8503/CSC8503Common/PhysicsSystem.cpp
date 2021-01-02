@@ -24,8 +24,8 @@ PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	useBroadPhase	= true;	
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
-	linearDamping	= 0.4f;
-	SetGravity(Vector3(0.0f, -9.8f, 0.0f));
+	linearDamping	= 1.0f;
+	SetGravity(Vector3(0.0f, -100.0f, 0.0f));
 }
 
 PhysicsSystem::~PhysicsSystem()	{

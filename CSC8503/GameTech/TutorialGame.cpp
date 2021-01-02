@@ -96,12 +96,35 @@ void TutorialGame::UpdateGame(float dt) {
 		Quaternion q(modelMat);
 		Vector3 angles = q.ToEuler(); //nearly there now!
 
+		//if (Window::GetKeyboard()->KeyDown(KeyboardKeys::E))
+		//{
+		//	viewAngle += 0.2f;
+		//	if (viewAngle >= 360.0f)
+		//	{
+		//		viewAngle = viewAngle - 360.0f;
+		//	}
+
+		//}
+		//angles.y += viewAngle;
 		world->GetMainCamera()->SetPosition(camPos);
-		world->GetMainCamera()->SetPitch(angles.x);
+		world->GetMainCamera()->SetPitch(-15.0f);
 		world->GetMainCamera()->SetYaw(angles.y);
 
-		//Debug::DrawAxisLines(lockedObject->GetTransform().GetMatrix(), 2.0f);
+		//Window::GetMouse()->
 	}
+	renderer->DrawString("Score: " + std::to_string(score), Vector2(5, 10));
+	time += dt;
+	if (time > 1.0 && !gameOver)
+	{
+		score = score - 10;
+		time = 0;
+	}
+		
+	if(score == 0)
+	{
+		gameOver = true;
+	}
+	//Vector2(10, 20)
 
 	world->UpdateWorld(dt);
 	renderer->Update(dt);
@@ -170,25 +193,33 @@ void TutorialGame::LockedObjectMovement() {
 
 	float force = 100.0f;
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
 		lockedObject->GetPhysicsObject()->AddForce(-rightAxis * force);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
 		Vector3 worldPos = selectionObject->GetTransform().GetPosition();
 		lockedObject->GetPhysicsObject()->AddForce(rightAxis * force);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
 		lockedObject->GetPhysicsObject()->AddForce(fwdAxis * force);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
 		lockedObject->GetPhysicsObject()->AddForce(-fwdAxis * force);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NEXT)) {
-		lockedObject->GetPhysicsObject()->AddForce(Vector3(0,-10,0));
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SPACE)) {
+		lockedObject->GetPhysicsObject()->AddForce(Vector3(0,-10000,0));
+	}
+
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::E))
+	{
+		//float yaw = world->GetMainCamera()->GetPitch();
+		//yaw += 10.0f;
+		lockedObject->GetPhysicsObject()->AddTorque(Vector3(0, 1, 0));
+		world->GetMainCamera()->SetPitch(100.0f);
 	}
 }
 
@@ -246,8 +277,8 @@ void TutorialGame::InitWorld() {
 
 	//InitMixedGridWorld(5, 5, 3.5f, 3.5f);
 	InitGameExamples();
-	//InitDefaultFloor();
-	BridgeConstraintTest();
+	InitDefaultFloor();
+	//BridgeConstraintTest();
 }
 
 void TutorialGame::BridgeConstraintTest()
@@ -263,15 +294,13 @@ void TutorialGame::BridgeConstraintTest()
 	
 	GameObject * start = AddCubeToWorld(startPos + Vector3(0, 0, 0)
 			, cubeSize, 0);
-	GameObject * end = AddCubeToWorld(startPos + Vector3((numLinks + 2)
-		* cubeDistance, 0, 0), cubeSize, 0);
+	GameObject * end = AddCubeToWorld(startPos + Vector3(0, 0,-((numLinks + 2) * cubeDistance)), cubeSize, 0);
 	
 	GameObject * previous = start;
 	
 	for (int i = 0; i < numLinks; ++i) 
 	{
-		GameObject * block = AddCubeToWorld(startPos + Vector3((i + 1) *
-			cubeDistance, 0, 0), cubeSize, invCubeMass);
+		GameObject * block = AddCubeToWorld(startPos + Vector3(0, 0,-((i + 1) * cubeDistance)), cubeSize, invCubeMass);
 		PositionConstraint * constraint = new PositionConstraint(previous,
 			block, maxDistance);
 		world -> AddConstraint(constraint);
@@ -457,7 +486,7 @@ GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
 
 	world->AddGameObject(character);
 
-	//lockedObject = character;
+	lockedObject = character;
 
 	return character;
 }
@@ -502,6 +531,8 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 
 	apple->GetPhysicsObject()->SetInverseMass(1.0f);
 	apple->GetPhysicsObject()->InitSphereInertia();
+
+	apple->SetWorldID(1);
 
 	world->AddGameObject(apple);
 
