@@ -61,6 +61,12 @@ namespace NCL {
 				//std::cout << "OnCollisionEnd event occured!\n";
 			}
 
+			virtual void Update(float dt)
+			{
+
+			}
+
+
 			bool GetBroadphaseAABB(Vector3&outsize) const;
 
 			void UpdateBroadphaseAABB();

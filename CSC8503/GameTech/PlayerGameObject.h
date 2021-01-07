@@ -8,9 +8,12 @@ namespace NCL
 		{
 			
 			void OnCollisionBegin(GameObject* otherObject) override;
+			void Update(float dt) override;
 
 		public:
 			int score;
+			float time = 0;
+
 			int getScore()
 			{
 				return score;
@@ -27,7 +30,7 @@ namespace NCL
 			{
 				score -= a;
 			}
-
+			
 			PlayerGameObject(string name = "");
 		};
 

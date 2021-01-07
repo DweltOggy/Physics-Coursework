@@ -12,9 +12,9 @@ StateGameObject::StateGameObject()
 	stateMachine = new StateMachine();
 	
 	State * stateA = new State([&](float dt) -> void
-	{
-		this -> MoveLeft(dt);
-	}
+		{
+			this -> MoveLeft(dt);
+		}
 	);
 	State * stateB = new State([&](float dt) -> void
 	{
@@ -27,16 +27,16 @@ StateGameObject::StateGameObject()
 	
 	stateMachine -> AddTransition(new StateTransition(stateA, stateB,
 	[&]() -> bool
-	{
-		return this -> counter > 3.0f;
-	}
+		{
+			return this -> counter > 3.0f;
+		}
 	));
 	
 	stateMachine -> AddTransition(new StateTransition(stateB, stateA,
 	[&]() -> bool
-	{
-		return this -> counter < 0.0f;
-	}
+		{
+			return this -> counter < 0.0f;
+		}
 	));
 	
 }

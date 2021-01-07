@@ -7,7 +7,6 @@ using namespace CSC8503;
 PlayerGameObject::PlayerGameObject(string name)
 {
 	score = 1000;
-	//GameObject::GameObject(name);
 }
 
 void PlayerGameObject::OnCollisionBegin(GameObject* otherObject)
@@ -16,4 +15,22 @@ void PlayerGameObject::OnCollisionBegin(GameObject* otherObject)
 	{
 		score += 25;
 	}
+}
+
+void PlayerGameObject::Update(float dt)
+{
+	if (isActive)
+	{
+		time += dt;
+		if (time > 1.0 && isActive)
+		{
+			removeScore(10);
+			time = 0;
+		}
+		if (getScore() <= 0)
+		{
+			isActive = false;
+		}
+	}
+
 }

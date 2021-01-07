@@ -4,10 +4,11 @@
 #include "StateGameObject.h"
 #include "BonusGameObject.h"
 #include "PlayerGameObject.h"
+#include "MovingGameObject.h"
 
 namespace NCL {
 	namespace CSC8503 {
-		enum type {bonus, Players, enemy, obstacle};
+		enum type {bonus, Players, enemy, obstacle, finish};
 
 		class TutorialGame		{
 		public:
@@ -48,6 +49,7 @@ namespace NCL {
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius,float elasticity, float inverseMass = 10.0f);
+			GameObject* AddMovingSphereToWorld(const Vector3& position, float radius, float elasticity, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);
@@ -85,7 +87,7 @@ namespace NCL {
 
 			//Coursework Additional functionality	
 			GameObject* lockedObject	= nullptr;
-			Vector3 lockedOffset		= Vector3(0, 7, 12);
+			Vector3 lockedOffset		= Vector3(0, 5, 12);
 
 			void LockCameraToObject(GameObject* o) {
 				lockedObject = o;
@@ -94,6 +96,7 @@ namespace NCL {
 			//Coursework Additions
 			
 			bool gameOver = false;
+			bool win = false;
 			float time = 0;
 
 			bool tutorial = false;

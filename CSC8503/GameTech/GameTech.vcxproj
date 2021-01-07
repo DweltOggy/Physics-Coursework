@@ -144,6 +144,8 @@
     <ClCompile Include="BonusGameObject.cpp" />
     <ClCompile Include="GameTechRenderer.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MovingGameObject.cpp" />
+    <ClCompile Include="MovingPlatform.cpp" />
     <ClCompile Include="PlayerGameObject.cpp" />
     <ClCompile Include="StateGameObject.cpp" />
     <ClCompile Include="TutorialGame.cpp" />
@@ -151,6 +153,8 @@
   <ItemGroup>
     <ClInclude Include="BonusGameObject.h" />
     <ClInclude Include="GameTechRenderer.h" />
+    <ClInclude Include="MovingGameObject.h" />
+    <ClInclude Include="MovingPlatform.h" />
     <ClInclude Include="PlayerGameObject.h" />
     <ClInclude Include="StateGameObject.h" />
     <ClInclude Include="TutorialGame.h" />

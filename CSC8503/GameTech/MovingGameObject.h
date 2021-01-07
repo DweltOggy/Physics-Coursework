@@ -4,12 +4,12 @@ namespace NCL
 {
 	namespace CSC8503
 	{
-		class BonusGameObject : public GameObject
+		class MovingGameObject : public GameObject
 		{
-			void OnCollisionBegin(GameObject* otherObject) override;
+		public:
+			float time = 0;
 			void Update(float dt) override;
 		};
+
 	}
 }
-
-

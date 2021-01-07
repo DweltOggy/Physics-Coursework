@@ -82,14 +82,20 @@ void TutorialGame::UpdateGame(float dt) {
 	else {
 		Debug::Print("(G)ravity off", Vector2(5, 95));
 	}
-	SelectObject();
-	MoveSelectedObject();
+
+
+	if (tutorial)
+	{
+		SelectObject();
+		MoveSelectedObject();
+	}
+
 	physics->Update(dt);
 
 	if (lockedObject != nullptr) {
 		Vector3 objPos	= lockedObject->GetTransform().GetPosition();
-		Vector3 test	=   lockedObject->GetTransform().GetOrientation() * lockedOffset;
-		Vector3 camPos	= objPos + test;
+		Vector3 objOrient	= lockedObject->GetTransform().GetOrientation() * lockedOffset;
+		Vector3 camPos	= objPos + objOrient;
 
 		Matrix4 temp = Matrix4::BuildViewMatrix(camPos, objPos, Vector3(0,1,0));
 
@@ -99,27 +105,21 @@ void TutorialGame::UpdateGame(float dt) {
 		Vector3 angles = q.ToEuler(); //nearly there now!
 
 		world->GetMainCamera()->SetPosition(camPos);
-		world->GetMainCamera()->SetPitch(-15.0f);
+		world->GetMainCamera()->SetPitch(-12.0f);
 		world->GetMainCamera()->SetYaw(angles.y);
 	}
 	if (player != nullptr)
 	{
 		int tempScore = player->getScore();
 		renderer->DrawString("Score: " + std::to_string(tempScore), Vector2(5, 10));
-		time += dt;
-		if (time > 1.0 && !gameOver)
-		{
-			player->removeScore(10);
-			time = 0;
-		}
+
 		
-		if(player->getScore() == 0)
+		if(player->getScore() <= 0)
 		{
 			gameOver = true;
+			renderer->DrawString("GAME OVER!", Vector2(30, 50),Vector4(1.0f,0.0f,0.0f,0.0f),50.0f);
 		}
 	}
-
-
 
 	if (testStateObject) 
 	{
@@ -137,7 +137,7 @@ void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
 		InitWorld(); //We can reset the simulation at any time with F1
 		selectionObject = nullptr;
-		lockedObject	= nullptr;
+		//lockedObject	= nullptr;
 	}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
@@ -166,7 +166,7 @@ void TutorialGame::UpdateKeys() {
 		world->ShuffleObjects(false);
 	}
 
-	if (lockedObject) {
+	if (lockedObject && gameOver != true) {
 		LockedObjectMovement();
 	}
 	else {
@@ -192,7 +192,7 @@ void TutorialGame::LockedObjectMovement() {
 	//Vector3 charForward2 = lockedObject->GetTransform().GetOrientation() * Vector3(0, 0, 1);
 
 	float force = 100.0f;
-	float turnSpeed = 10.0f;
+	float turnSpeed = 30.0f;
 	float jumpForce = 6000.0f;
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
@@ -278,8 +278,11 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
+	gameOver = false;
+
 	if(tutorial)
 	{
+		lockedObject = nullptr;
 		//InitMixedGridWorld(5, 5, 3.5f, 3.5f);
 		InitGameExamples();
 		InitDefaultFloor();
@@ -297,7 +300,8 @@ void TutorialGame::InitSingleCourse()
 {
 	Vector3 origin = Vector3(0, 0, 0);
 
-	AddPlayerToWorld(origin + Vector3(0, 5, -10));
+	//AddCubeToWorld(origin + Vector3(0, 20, 0), Vector3(510, 2, 1500), 0);
+	lockedObject = AddPlayerToWorld(origin + Vector3(0, 7, -10));
 
 	bouncyballJump(origin);
 	balanceBeam(origin);
@@ -321,7 +325,7 @@ void TutorialGame::bouncyballJump(const Vector3& position)
 
 	for (int i = 0; i < numBalls; i++)
 	{
-		AddSphereToWorld(position + Vector3((rand() % 30) - 15, 7, -((rand() % 380) + 15)), 3.0f, elasticity, 0);
+		AddSphereToWorld(position + Vector3((rand() % 30) - 15, 7, -((rand() % 380) + 15)), 1.5f, elasticity, 0);
 	}
 
 	//place bonuses
@@ -431,7 +435,7 @@ A single function to add a large immoveable cube to the bottom of our world
 GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 	GameObject* floor = new GameObject();
 
-	Vector3 floorSize	= Vector3(20, 2, 20);
+	Vector3 floorSize	= Vector3(100, 2, 100);
 	AABBVolume* volume	= new AABBVolume(floorSize);
 	floor->SetBoundingVolume((CollisionVolume*)volume);
 	floor->GetTransform()
@@ -458,6 +462,31 @@ physics worlds. You'll probably need another function for the creation of OBB cu
 */
 GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float elasticity,float inverseMass) {
 	GameObject* sphere = new GameObject();
+
+	Vector3 sphereSize = Vector3(radius, radius, radius);
+	SphereVolume* volume = new SphereVolume(radius);
+	sphere->SetBoundingVolume((CollisionVolume*)volume);
+
+	sphere->GetTransform()
+		.SetScale(sphereSize)
+		.SetPosition(position);
+
+	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, basicTex, basicShader));
+	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
+
+	sphere->GetPhysicsObject()->setElasticity(elasticity);
+
+	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
+	sphere->GetPhysicsObject()->InitSphereInertia();
+
+	world->AddGameObject(sphere);
+
+	return sphere;
+}
+
+GameObject* TutorialGame::AddMovingSphereToWorld(const Vector3& position, float radius, float elasticity, float inverseMass) 
+{
+	MovingGameObject* sphere = new MovingGameObject();
 
 	Vector3 sphereSize = Vector3(radius, radius, radius);
 	SphereVolume* volume = new SphereVolume(radius);
@@ -605,7 +634,7 @@ GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
 
 	world->AddGameObject(character);
 
-	lockedObject = character;
+	//lockedObject = character;
 	player = character;
 
 	return character;
@@ -654,7 +683,7 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 
 	apple->SetPhysicsObject(new PhysicsObject(&apple->GetTransform(), apple->GetBoundingVolume()));
 
-	apple->GetPhysicsObject()->SetInverseMass(0.0f);
+	apple->GetPhysicsObject()->SetInverseMass(1.0f);
 	apple->GetPhysicsObject()->InitSphereInertia();
 
 	apple->SetType(bonus);
