@@ -73,6 +73,14 @@ namespace NCL {
 				return worldID;
 			}
 
+			void SetType(int newType) {
+				type = newType;
+			}
+
+			int		GetType() const {
+				return type;
+			}
+
 		protected:
 			Transform			transform;
 
@@ -82,6 +90,7 @@ namespace NCL {
 
 			bool	isActive;
 			int		worldID;
+			int		type;
 			string	name;
 
 			Vector3 broadphaseAABB;

@@ -2,9 +2,13 @@
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
 #include "StateGameObject.h"
+#include "BonusGameObject.h"
+#include "PlayerGameObject.h"
 
 namespace NCL {
 	namespace CSC8503 {
+		enum type {bonus, Players, enemy, obstacle};
+
 		class TutorialGame		{
 		public:
 			TutorialGame();
@@ -27,6 +31,15 @@ namespace NCL {
 			void InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const Vector3& cubeDims);
 			void InitDefaultFloor();
 			void BridgeConstraintTest();
+
+			void initStartMenu();
+			void InitReplayMenu();
+
+			void InitSingleCourse();
+			void bouncyballJump(const Vector3& position);
+			void fallingBallRamp(const Vector3& position);
+			void balanceBeam(const Vector3& position);
+			void MovingPlatforms(const Vector3& position);
 	
 			bool SelectObject();
 			void MoveSelectedObject();
@@ -34,7 +47,7 @@ namespace NCL {
 			void LockedObjectMovement();
 
 			GameObject* AddFloorToWorld(const Vector3& position);
-			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
+			GameObject* AddSphereToWorld(const Vector3& position, float radius,float elasticity, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);
@@ -79,13 +92,16 @@ namespace NCL {
 			}
 
 			//Coursework Additions
-			//camera stuff
-			float viewAngle = 0;
-			Vector3 lockedRotate = Vector3(1, 0, 0);
-
-			int score = 1000;
+			
 			bool gameOver = false;
 			float time = 0;
+
+			bool tutorial = false;
+			bool singlePlayer = true;
+
+			Vector3 courseOffset = Vector3(0, 0, 0);
+
+			PlayerGameObject* player = nullptr;
 		
 		};
 	}

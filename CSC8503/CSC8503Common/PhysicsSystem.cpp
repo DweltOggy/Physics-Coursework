@@ -20,7 +20,7 @@ and the forces that are added to objects to change those positions
 */
 
 PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
-	applyGravity	= false;
+	applyGravity	= true;
 	useBroadPhase	= true;	
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
@@ -292,23 +292,23 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 void PhysicsSystem::ResolveSpringCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const
 {
 
-	PhysicsObject* physA = a.GetPhysicsObject();
-	PhysicsObject* physB = b.GetPhysicsObject();
+	//PhysicsObject* physA = a.GetPhysicsObject();
+	//PhysicsObject* physB = b.GetPhysicsObject();
 
-	//float restingLength = 0;
-	float x = p.penetration;
-	float k = 1.0;
+	////float restingLength = 0;
+	//float x = p.penetration;
+	//float k = 1.0;
 
-	float F = -(k * x);
+	//float F = -(k * x);
 
-	float sepForce = 300.0f;
+	//float sepForce = 300.0f;
 
-	//float magnitude = F * sepForce;
+	////float magnitude = F * sepForce;
 
-	Vector3 applyForce = p.normal * F;// magnitude;
+	//Vector3 applyForce = p.normal * F;// magnitude;
 
-	physA->AddForceAtPosition(-applyForce, p.localA);
-	physB->AddForceAtPosition(applyForce, p.localB);
+	//physA->AddForceAtPosition(-applyForce, p.localA);
+	//physB->AddForceAtPosition(applyForce, p.localB);
 
 
 }

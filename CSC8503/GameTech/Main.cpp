@@ -130,8 +130,8 @@ int main() {
 
 		g->UpdateGame(dt);
 
-		TestStateMachine();
-		DisplayPathfinding();
+		//TestStateMachine();
+		//DisplayPathfinding();
 	}
 	Window::DestroyGameWindow();
 }
