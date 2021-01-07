@@ -20,7 +20,5 @@ void BonusGameObject::Update(float dt)
 	float turnSpeed = 100.0f;
 	//a bit of spin for fun
 	physicsObject->AddTorque(Vector3(0, 1, 0) * turnSpeed);
-	//countering gravity so they hover probs a better way
-	physicsObject->AddForce(Vector3(0, 1, 0) * 100.0f);
 
 }

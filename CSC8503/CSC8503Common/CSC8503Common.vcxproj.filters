@@ -105,6 +105,9 @@
     <ClInclude Include="PositionConstraint.h">
       <Filter>Physics</Filter>
     </ClInclude>
+    <ClInclude Include="FloatConstraint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameWorld.cpp">
@@ -154,6 +157,9 @@
     </ClCompile>
     <ClCompile Include="PositionConstraint.cpp">
       <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="FloatConstraint.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

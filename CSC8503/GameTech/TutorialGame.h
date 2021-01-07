@@ -5,6 +5,7 @@
 #include "BonusGameObject.h"
 #include "PlayerGameObject.h"
 #include "MovingGameObject.h"
+#include "MovingPlatform.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -59,7 +60,10 @@ namespace NCL {
 			GameObject* AddBonusToWorld(const Vector3& position);
 
 			StateGameObject* AddStateObjectToWorld(const Vector3 & position);
+			
 			StateGameObject* testStateObject;
+			
+			MovingPlatform* AddMovingPlatform(const Vector3& position);
 
 
 			GameTechRenderer*	renderer;

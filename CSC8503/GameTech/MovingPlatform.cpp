@@ -36,28 +36,28 @@ MovingPlatform::MovingPlatform()
 	stateMachine->AddTransition(new StateTransition(forward, left,
 		[&]() -> bool
 		{
-		
+			return GetTransform().GetPosition().z < -770;
 		}
 	));
 
 	stateMachine->AddTransition(new StateTransition(left, backward,
 		[&]() -> bool
 		{
-
+			return GetTransform().GetPosition().x < -50;
 		}
 	));
 
 	stateMachine->AddTransition(new StateTransition(backward, right,
 		[&]() -> bool
 		{
-
+			return GetTransform().GetPosition().z > -630;
 		}
 	));
 
 	stateMachine->AddTransition(new StateTransition(right, forward,
 		[&]() -> bool
 		{
-
+			return GetTransform().GetPosition().x > 50;
 		}
 	));
 }
@@ -69,26 +69,26 @@ MovingPlatform::~MovingPlatform()
 
 void MovingPlatform::Update(float dt)
 {
-	GetPhysicsObject()->AddForce({ 0 , 100 , 0 });
+	//GetPhysicsObject()->AddForce({ 0 , 1000 , 0 });
 	stateMachine->Update(dt);
 }
 
 void MovingPlatform::MoveForward(float dt)
 {
-	GetPhysicsObject()->AddForce({ 0 , 0 , -60 });
+	GetPhysicsObject()->AddForce({ 0 , 0 , -300 });
 }
 
 void MovingPlatform::MoveBackward(float dt)
 {
-	GetPhysicsObject()->AddForce({ 0 , 0 , 60 });
+	GetPhysicsObject()->AddForce({ 0 , 0 , 300 });
 }
 
 void MovingPlatform::MoveLeft(float dt)
 {
-	GetPhysicsObject()->AddForce({ -60 , 0 , 0 });
+	GetPhysicsObject()->AddForce({ -300 , 0 , 0 });
 }
 
 void MovingPlatform::MoveRight(float dt)
 {
-	GetPhysicsObject()->AddForce({60 , 0 , 0 });
+	GetPhysicsObject()->AddForce({300 , 0 , 0 });
 }

@@ -5,6 +5,7 @@
 #include "../../Plugins/OpenGLRendering/OGLTexture.h"
 #include "../../Common/TextureLoader.h"
 #include "../CSC8503Common/PositionConstraint.h"
+#include "../CSC8503Common/FloatConstraint.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -331,7 +332,7 @@ void TutorialGame::bouncyballJump(const Vector3& position)
 	//place bonuses
 	for (int i = 0; i < 5; i++)
 	{
-		AddBonusToWorld(position + Vector3((rand() % 30) - 15, 5, -((rand() % 380) + 15) ));
+		AddBonusToWorld(position + Vector3((rand() % 30) - 15, 7, -((rand() % 380) + 15) ));
 	}
 }
 
@@ -368,7 +369,7 @@ void TutorialGame::balanceBeam(const Vector3& position)
 	//place bonuses
 	for (int i = 0; i < 5; i++)
 	{
-		AddBonusToWorld(position + Vector3(0, 5, -400 - (i * 40)));
+		AddBonusToWorld(position + Vector3(0, 7, -400 - (i * 40)));
 	}
 
 }
@@ -387,6 +388,30 @@ void TutorialGame::MovingPlatforms(const Vector3& position)
 	AddCubeToWorld(position + Vector3(-50, 0, -800), Vector3(30, 20, 1), 0);
 	AddCubeToWorld(position + Vector3(50, 0, -800), Vector3(30, 20, 1), 0);
 	AddCubeToWorld(position + Vector3(0, -10, -800), Vector3(20, 10, 1), 0);
+
+
+
+	//AddMovingPlatform(Vector3(20, 0, -665));
+	//AddMovingPlatform(Vector3(-10, 0, -700));
+	//AddMovingPlatform(Vector3(-30, 0, -735));
+	//AddMovingPlatform(Vector3(-50, 0, -770));
+
+	Vector3 bottomLeft = Vector3(-50, 0, -770);
+	for (int i = 0; i < 5; i++)
+	{
+		MovingPlatform* platform = AddMovingPlatform(bottomLeft + Vector3(0+(i*20),0,0+(i*35)));
+		FloatConstraint* constraint = new FloatConstraint(platform, 0);
+		world->AddConstraint(constraint);
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			if(j == 0 || j == 4)
+				AddBonusToWorld(position + Vector3(j * 40, 7, -700 - (i * 40)));
+		}
+	}
 
 }
 
@@ -462,31 +487,6 @@ physics worlds. You'll probably need another function for the creation of OBB cu
 */
 GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float elasticity,float inverseMass) {
 	GameObject* sphere = new GameObject();
-
-	Vector3 sphereSize = Vector3(radius, radius, radius);
-	SphereVolume* volume = new SphereVolume(radius);
-	sphere->SetBoundingVolume((CollisionVolume*)volume);
-
-	sphere->GetTransform()
-		.SetScale(sphereSize)
-		.SetPosition(position);
-
-	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, basicTex, basicShader));
-	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
-
-	sphere->GetPhysicsObject()->setElasticity(elasticity);
-
-	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
-	sphere->GetPhysicsObject()->InitSphereInertia();
-
-	world->AddGameObject(sphere);
-
-	return sphere;
-}
-
-GameObject* TutorialGame::AddMovingSphereToWorld(const Vector3& position, float radius, float elasticity, float inverseMass) 
-{
-	MovingGameObject* sphere = new MovingGameObject();
 
 	Vector3 sphereSize = Vector3(radius, radius, radius);
 	SphereVolume* volume = new SphereVolume(radius);
@@ -602,7 +602,7 @@ void TutorialGame::InitGameExamples() {
 
 GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
 	float meshSize = 3.0f;
-	float inverseMass = 0.5f;
+	float inverseMass = 0.7f;
 
 	string name = "Player";
 
@@ -688,6 +688,9 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 
 	apple->SetType(bonus);
 
+	FloatConstraint* constraint = new FloatConstraint(apple, position.y);
+	world->AddConstraint(constraint);
+
 	world->AddGameObject(apple);
 
 	return apple;
@@ -712,6 +715,31 @@ StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position)
 	world->AddGameObject(apple);
 
 	return apple;
+}
+
+MovingPlatform* TutorialGame::AddMovingPlatform(const Vector3& position)
+{
+	Vector3 dimensions = Vector3(10, 1, 10);
+	float invMass = 0.1f;
+
+	MovingPlatform* platform = new MovingPlatform();
+	AABBVolume* volume = new AABBVolume(dimensions);
+
+	platform->SetBoundingVolume((CollisionVolume*)volume);
+
+	platform->GetTransform()
+		.SetPosition(position)
+		.SetScale(dimensions * 2);
+
+	platform->SetRenderObject(new RenderObject(&platform->GetTransform(), cubeMesh, basicTex, basicShader));
+	platform->SetPhysicsObject(new PhysicsObject(&platform->GetTransform(), platform->GetBoundingVolume()));
+
+	platform->GetPhysicsObject()->SetInverseMass(invMass);
+	platform->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(platform);
+
+	return platform;
 }
 
 /*
