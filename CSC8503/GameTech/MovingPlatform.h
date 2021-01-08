@@ -13,6 +13,7 @@ namespace NCL
 			~MovingPlatform();
 
 			void Update(float dt);
+			void OnCollisionBegin(GameObject* otherObject) override;
 
 		protected:
 			void MoveLeft(float dt);
@@ -20,6 +21,8 @@ namespace NCL
 
 			void MoveForward(float dt);
 			void MoveBackward(float dt);
+
+			int direction;
 
 			StateMachine* stateMachine;
 		};

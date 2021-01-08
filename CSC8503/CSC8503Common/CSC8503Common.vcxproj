@@ -135,6 +135,7 @@
     <ClInclude Include="AABBVolume.h" />
     <ClInclude Include="CapsuleVolume.h" />
     <ClInclude Include="FloatConstraint.h" />
+    <ClInclude Include="MotorConstraint.h" />
     <ClInclude Include="NavigationGrid.h" />
     <ClInclude Include="NavigationMap.h" />
     <ClInclude Include="NavigationMesh.h" />
@@ -166,6 +167,7 @@
     <ClCompile Include="FloatConstraint.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameWorld.cpp" />
+    <ClCompile Include="MotorConstraint.cpp" />
     <ClCompile Include="NavigationGrid.cpp" />
     <ClCompile Include="NavigationMesh.cpp" />
     <ClCompile Include="PhysicsObject.cpp" />

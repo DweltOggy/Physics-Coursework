@@ -50,7 +50,7 @@ namespace NCL {
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius,float elasticity, float inverseMass = 10.0f);
-			GameObject* AddMovingSphereToWorld(const Vector3& position, float radius, float elasticity, float inverseMass = 10.0f);
+			GameObject* AddStateSphereToWorld(const Vector3& position, float radius, float elasticity, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);

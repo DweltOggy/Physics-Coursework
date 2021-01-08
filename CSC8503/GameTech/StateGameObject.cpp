@@ -8,7 +8,7 @@ using namespace CSC8503;
 
 StateGameObject::StateGameObject() 
 {
-	counter = 0.0f;
+	counter = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 1.0));
 	stateMachine = new StateMachine();
 	
 	State * stateA = new State([&](float dt) -> void
@@ -22,13 +22,14 @@ StateGameObject::StateGameObject()
 	}
 	);
 	
-	stateMachine -> AddState(stateA);
+	
 	stateMachine -> AddState(stateB);
+	stateMachine -> AddState(stateA);
 	
 	stateMachine -> AddTransition(new StateTransition(stateA, stateB,
 	[&]() -> bool
 		{
-			return this -> counter > 3.0f;
+			return this -> counter > 1.0f;
 		}
 	));
 	
@@ -53,12 +54,12 @@ void StateGameObject::Update(float dt)
 
 void StateGameObject::MoveLeft(float dt) 
 {
-	GetPhysicsObject() -> AddForce({ -100 , 0 , 0 });
+	GetPhysicsObject() -> AddForce({ -400 , 0 , 0 });
 	counter += dt;
 }
 
 void StateGameObject::MoveRight(float dt) 
 {
-	GetPhysicsObject() -> AddForce({ 100 , 0 , 0 });
+	GetPhysicsObject() -> AddForce({ 400 , 0 , 0 });
 	counter -= dt;
 }

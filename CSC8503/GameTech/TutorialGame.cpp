@@ -21,7 +21,6 @@ TutorialGame::TutorialGame()	{
 	testStateObject = nullptr;
 
 	Debug::SetRenderer(renderer);
-
 	InitialiseAssets();
 }
 
@@ -326,7 +325,7 @@ void TutorialGame::bouncyballJump(const Vector3& position)
 
 	for (int i = 0; i < numBalls; i++)
 	{
-		AddSphereToWorld(position + Vector3((rand() % 30) - 15, 7, -((rand() % 380) + 15)), 1.5f, elasticity, 0);
+		AddSphereToWorld(position + Vector3((rand() % 30) - 15, 7, -((rand() % 380) + 15)), 3.0f, elasticity, 0);
 	}
 
 	//place bonuses
@@ -362,7 +361,7 @@ void TutorialGame::balanceBeam(const Vector3& position)
 	for (int i = 0; i < 5; i++)
 	{
 		GameObject* anchor = AddCubeToWorld(position + Vector3(0, 20, -420 - (i * 40)), Vector3(1, 1, 1), 0);
-		GameObject* sphere = AddSphereToWorld(position + Vector3(0, 5, -420 - (i * 40)), 2.0f, 0.8f, 0.2f);
+		GameObject* sphere = AddStateSphereToWorld(position + Vector3(0, 5, -420 - (i * 40)), 3.0f, 0.8f, 0.2f);
 		PositionConstraint* constraint = new PositionConstraint(anchor, sphere, maxDistance);
 		world->AddConstraint(constraint);
 	}
@@ -390,26 +389,22 @@ void TutorialGame::MovingPlatforms(const Vector3& position)
 	AddCubeToWorld(position + Vector3(0, -10, -800), Vector3(20, 10, 1), 0);
 
 
-
-	//AddMovingPlatform(Vector3(20, 0, -665));
-	//AddMovingPlatform(Vector3(-10, 0, -700));
-	//AddMovingPlatform(Vector3(-30, 0, -735));
-	//AddMovingPlatform(Vector3(-50, 0, -770));
-
 	Vector3 bottomLeft = Vector3(-50, 0, -770);
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 2; i++)
 	{
-		MovingPlatform* platform = AddMovingPlatform(bottomLeft + Vector3(0+(i*20),0,0+(i*35)));
+		MovingPlatform* platform = AddMovingPlatform(bottomLeft + Vector3(0+(i*100),0,0+(i*140)));
 		FloatConstraint* constraint = new FloatConstraint(platform, 0);
 		world->AddConstraint(constraint);
 	}
+
+
 
 	for (int i = 0; i < 5; i++)
 	{
 		for (int j = 0; j < 5; j++)
 		{
-			if(j == 0 || j == 4)
-				AddBonusToWorld(position + Vector3(j * 40, 7, -700 - (i * 40)));
+			if(j == 0 || j == 4 || i == 0 || i == 4)
+				AddBonusToWorld(position + Vector3((j - 2) * 30, 7, -700 - ((i -2) * 40)));
 		}
 	}
 
@@ -715,6 +710,30 @@ StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position)
 	world->AddGameObject(apple);
 
 	return apple;
+}
+
+GameObject* TutorialGame::AddStateSphereToWorld(const Vector3& position, float radius, float elasticity, float inverseMass)
+{
+	StateGameObject* sphere = new StateGameObject();
+	Vector3 sphereSize = Vector3(radius, radius, radius);
+	SphereVolume* volume = new SphereVolume(radius);
+	sphere->SetBoundingVolume((CollisionVolume*)volume);
+
+	sphere->GetTransform()
+		.SetScale(sphereSize)
+		.SetPosition(position);
+
+	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, basicTex, basicShader));
+	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
+
+	sphere->GetPhysicsObject()->setElasticity(elasticity);
+
+	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
+	sphere->GetPhysicsObject()->InitSphereInertia();
+
+	world->AddGameObject(sphere);
+
+	return sphere;
 }
 
 MovingPlatform* TutorialGame::AddMovingPlatform(const Vector3& position)

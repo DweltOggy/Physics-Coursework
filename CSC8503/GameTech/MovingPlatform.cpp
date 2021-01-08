@@ -3,6 +3,7 @@
 #include "../CSC8503Common/StateMachine.h"
 #include "../CSC8503Common/State.h"
 
+#include "TutorialGame.h"
 using namespace NCL;
 using namespace CSC8503;
 
@@ -10,6 +11,7 @@ using namespace CSC8503;
 MovingPlatform::MovingPlatform()
 {
 	stateMachine = new StateMachine();
+	direction = 0;
 
 	State* forward = new State([&](float dt)-> void 
 		{
@@ -36,28 +38,28 @@ MovingPlatform::MovingPlatform()
 	stateMachine->AddTransition(new StateTransition(forward, left,
 		[&]() -> bool
 		{
-			return GetTransform().GetPosition().z < -770;
+			return GetTransform().GetPosition().z < -775;
 		}
 	));
 
 	stateMachine->AddTransition(new StateTransition(left, backward,
 		[&]() -> bool
 		{
-			return GetTransform().GetPosition().x < -50;
+			return GetTransform().GetPosition().x < -55;
 		}
 	));
 
 	stateMachine->AddTransition(new StateTransition(backward, right,
 		[&]() -> bool
 		{
-			return GetTransform().GetPosition().z > -630;
+			return GetTransform().GetPosition().z > -625;
 		}
 	));
 
 	stateMachine->AddTransition(new StateTransition(right, forward,
 		[&]() -> bool
 		{
-			return GetTransform().GetPosition().x > 50;
+			return GetTransform().GetPosition().x > 55;
 		}
 	));
 }
@@ -71,6 +73,11 @@ void MovingPlatform::Update(float dt)
 {
 	//GetPhysicsObject()->AddForce({ 0 , 1000 , 0 });
 	stateMachine->Update(dt);
+}
+
+void MovingPlatform::OnCollisionBegin(GameObject* otherObject)
+{
+	
 }
 
 void MovingPlatform::MoveForward(float dt)
