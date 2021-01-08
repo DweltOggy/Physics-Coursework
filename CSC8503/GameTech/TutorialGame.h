@@ -6,6 +6,8 @@
 #include "PlayerGameObject.h"
 #include "MovingGameObject.h"
 #include "MovingPlatform.h"
+#include "FollowEnemy.h"
+#include "SpeedBlock.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -39,7 +41,6 @@ namespace NCL {
 
 			void InitSingleCourse();
 			void bouncyballJump(const Vector3& position);
-			void fallingBallRamp(const Vector3& position);
 			void balanceBeam(const Vector3& position);
 			void MovingPlatforms(const Vector3& position);
 	
@@ -51,12 +52,15 @@ namespace NCL {
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius,float elasticity, float inverseMass = 10.0f);
 			GameObject* AddStateSphereToWorld(const Vector3& position, float radius, float elasticity, float inverseMass = 10.0f);
-			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float elasticity, float inverseMass = 10.0f);
 			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);
 
 			GameObject* AddPlayerToWorld(const Vector3& position);
 			GameObject* AddEnemyToWorld(const Vector3& position);
+
+			FollowEnemy* AddFollowEnemyToWorld(const Vector3& position);
+
 			GameObject* AddBonusToWorld(const Vector3& position);
 
 			StateGameObject* AddStateObjectToWorld(const Vector3 & position);
@@ -64,6 +68,7 @@ namespace NCL {
 			StateGameObject* testStateObject;
 			
 			MovingPlatform* AddMovingPlatform(const Vector3& position);
+			SpeedBlock* AddSpeedBlock(const Vector3& position);
 
 
 			GameTechRenderer*	renderer;
