@@ -43,6 +43,10 @@ namespace NCL {
 			void bouncyballJump(const Vector3& position);
 			void balanceBeam(const Vector3& position);
 			void MovingPlatforms(const Vector3& position);
+
+			void initDoubleCourse();
+			void raceWay(const Vector3& position);
+			void obstacleWay(const Vector3& position);
 	
 			bool SelectObject();
 			void MoveSelectedObject();
@@ -53,6 +57,8 @@ namespace NCL {
 			GameObject* AddSphereToWorld(const Vector3& position, float radius,float elasticity, float inverseMass = 10.0f);
 			GameObject* AddStateSphereToWorld(const Vector3& position, float radius, float elasticity, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float elasticity, float inverseMass = 10.0f);
+
+			GameObject* AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, float elasticity, float inverseMass = 10.0f);
 			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);
 
@@ -110,7 +116,8 @@ namespace NCL {
 
 			bool tutorial = false;
 			bool singlePlayer = true;
-
+			bool twoPlayer = false;
+			
 			Vector3 courseOffset = Vector3(0, 0, 0);
 
 			PlayerGameObject* player = nullptr;

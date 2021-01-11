@@ -4,20 +4,24 @@
 namespace NCL {
 	namespace CSC8503 {
 		class PushdownState;
-
-		class PushdownMachine
+		
+		class PushdownMachine 
 		{
 		public:
-			PushdownMachine();
-			~PushdownMachine();
-
-			void Update();
-
+			PushdownMachine(PushdownState * initialState) 
+			{
+				this -> initialState = initialState;
+					
+			}
+			~PushdownMachine() {}
+				
+			bool Update(float dt);
+				
 		protected:
 			PushdownState * activeState;
-
-			std::stack<PushdownState*> stateStack;
-		};
+			PushdownState * initialState;
+				
+			std::stack < PushdownState* > stateStack;
+		};	
 	}
 }
-

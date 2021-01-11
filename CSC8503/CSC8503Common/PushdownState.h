@@ -11,9 +11,9 @@ namespace NCL {
 				Push, Pop, NoChange
 			};
 			PushdownState();
-			~PushdownState();
+			virtual ~PushdownState();
 
-			PushdownResult PushdownUpdate(PushdownState** pushResult);
+			virtual PushdownResult OnUpdate(float dt, PushdownState * *pushFunc) = 0;
 
 			virtual void OnAwake() {} //By default do nothing
 			virtual void OnSleep() {} //By default do nothing

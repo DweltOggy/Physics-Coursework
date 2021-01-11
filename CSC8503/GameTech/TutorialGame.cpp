@@ -21,6 +21,10 @@ TutorialGame::TutorialGame()	{
 	inSelectionMode = false;
 	testStateObject = nullptr;
 
+	tutorial = false;
+	singlePlayer = false;
+	twoPlayer = true;
+
 	Debug::SetRenderer(renderer);
 	InitialiseAssets();
 }
@@ -115,10 +119,16 @@ void TutorialGame::UpdateGame(float dt) {
 		renderer->DrawString("Score: " + std::to_string(tempScore), Vector2(5, 10));
 
 		
-		if(player->getScore() <= 0)
+		if(player->lost)
 		{
-			gameOver = true;
+			//gameOver = true;
 			renderer->DrawString("GAME OVER!", Vector2(30, 50),Vector4(1.0f,0.0f,0.0f,0.0f),50.0f);
+		}
+		if (player->won)
+		{
+			int tempScore = player->getScore();
+			renderer->DrawString("YOU WON!", Vector2(30, 50), Vector4(0.0f, 1.0f, 0.0f, 0.0f), 50.0f);
+			renderer->DrawString("your final Score: " + std::to_string(tempScore), Vector2(25, 60), Vector4(0.0f, 1.0f, 0.0f, 0.0f), 25.0f);
 		}
 	}
 
@@ -167,8 +177,9 @@ void TutorialGame::UpdateKeys() {
 		world->ShuffleObjects(false);
 	}
 
-	if (lockedObject && gameOver != true) {
-		LockedObjectMovement();
+	if (lockedObject) {
+		if(lockedObject->IsActive())
+			LockedObjectMovement();
 	}
 	else {
 		DebugObjectMovement();
@@ -191,10 +202,24 @@ void TutorialGame::LockedObjectMovement() {
 
 	//Vector3 charForward  = lockedObject->GetTransform().GetOrientation() * Vector3(0, 0, 1);
 	//Vector3 charForward2 = lockedObject->GetTransform().GetOrientation() * Vector3(0, 0, 1);
+	float force = 0.0f;
+	float turnSpeed = 0.0f;
+	float jumpForce = 0.0f;
+	
+	if (tutorial)
+	{
+		force = 1.0f;
+		turnSpeed = 1.0f;
+		jumpForce = 600.0f;
+	}
+	else
+	{
+		force = 100.0f;
+		turnSpeed = 30.0f;
+		jumpForce = 6000.0f;
 
-	float force = 100.0f;
-	float turnSpeed = 30.0f;
-	float jumpForce = 6000.0f;
+	}
+
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
 		lockedObject->GetPhysicsObject()->AddForce(-rightAxis * force);
@@ -288,11 +313,19 @@ void TutorialGame::InitWorld() {
 		InitGameExamples();
 		InitDefaultFloor();
 		//BridgeConstraintTest();
-		testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
+		//testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
 	}
 	else if (singlePlayer)
 	{
 		InitSingleCourse();
+	}
+	else if (twoPlayer)
+	{
+		initDoubleCourse();
+	}
+	else
+	{
+		InitDefaultFloor();
 	}
 	
 }
@@ -301,14 +334,16 @@ void TutorialGame::InitSingleCourse()
 {
 	Vector3 origin = Vector3(0, 0, 0);
 
-	//AddCubeToWorld(origin + Vector3(0, 20, 0), Vector3(510, 2, 1500), 0);
 	lockedObject = AddPlayerToWorld(origin + Vector3(0, 7, -10));
-
 	AddFollowEnemyToWorld(origin + Vector3(0, 7, -2));
 
 	bouncyballJump(origin);
 	balanceBeam(origin);
 	MovingPlatforms(origin);
+
+	GameObject* finishLine = AddCubeToWorld(origin + Vector3(0, 10, -859), Vector3(20, 10, 1), 0.1, 0);;
+	finishLine->SetType(finish);
+	finishLine->GetRenderObject()->SetColour(Vector4(0, 1, 1, 0.0f));
 }
 
 void TutorialGame::bouncyballJump(const Vector3& position)
@@ -323,34 +358,29 @@ void TutorialGame::bouncyballJump(const Vector3& position)
 	AddCubeToWorld(position + Vector3(0, 0, -200), Vector3(20, 2, 200), 0.1, 0);
 
 	AddCubeToWorld(position + Vector3(0, 10, 1), Vector3(20, 10, 1), 0.1, 0);
+	//AddCubeToWorld(position + Vector3(-10, 10, -50), Vector3(10, 10, 10),elasticity, 0);
+	//AddCubeToWorld(position + Vector3(10, 10, -140), Vector3(10, 10, 40), elasticity, 0);
+	//AddCubeToWorld(position + Vector3(-17, 10, -150), Vector3(3, 10, 30), elasticity, 0);
+	//AddCubeToWorld(position + Vector3(0, 10, -300), Vector3(10, 10, 50), elasticity, 0);
+	//AddCubeToWorld(position + Vector3(10, 10, -100), Vector3(10, 10, 10), elasticity, 0);
+	//AddCubeToWorld(position + Vector3(10, 10, -150), Vector3(10, 10, 30), elasticity, 0);
+	//AddCubeToWorld(position + Vector3(10, 10, -70), Vector3(10, 10, 1), elasticity, 0);
+	//AddCubeToWorld(position + Vector3(10, 10, -70), Vector3(10, 10, 1), elasticity, 0);
 
-	AddCubeToWorld(position + Vector3(-10, 10, -50), Vector3(10, 10, 10),elasticity, 0);
-
-	AddCubeToWorld(position + Vector3(10, 10, -140), Vector3(10, 10, 40), elasticity, 0);
-
-	AddCubeToWorld(position + Vector3(-17, 10, -150), Vector3(3, 10, 30), elasticity, 0);
-
-	AddCubeToWorld(position + Vector3(0, 10, -300), Vector3(10, 10, 50), elasticity, 0);
 
 	AddSpeedBlock(position + Vector3(10, 0.2, -50));
+	AddSpeedBlock(position + Vector3(0, 0.2, -100));
 
-	//AddCubeToWorld(position + Vector3(10, 10, -100), Vector3(10, 10, 10), elasticity, 0);
-
-	//AddCubeToWorld(position + Vector3(10, 10, -150), Vector3(10, 10, 30), elasticity, 0);
-
-	//AddCubeToWorld(position + Vector3(10, 10, -70), Vector3(10, 10, 1), elasticity, 0);
-
-	//AddCubeToWorld(position + Vector3(10, 10, -70), Vector3(10, 10, 1), elasticity, 0);
-	//for (int i = 0; i < numBalls; i++)
-	//{
-	//	AddSphereToWorld(position + Vector3((rand() % 30) - 15, 7, -((rand() % 380) + 15)), 3.0f, elasticity, 0);
-	//}
+	for (int i = 0; i < numBalls; i++)
+	{
+		//AddSphereToWorld(position + Vector3((rand() % 30) - 15, 7, -((rand() % 380) + 15)), 3.0f, elasticity, 0);
+	}
 
 	//place bonuses
-	//for (int i = 0; i < 5; i++)
-	//{
-	//	AddBonusToWorld(position + Vector3((rand() % 30) - 15, 5, -((rand() % 380) + 15) ));
-	//}
+	for (int i = 0; i < 5; i++)
+	{
+		AddBonusToWorld(position + Vector3((rand() % 30) - 15, 5, -((rand() % 380) + 15) ));
+	}
 }
 
 void TutorialGame::balanceBeam(const Vector3& position)
@@ -390,6 +420,7 @@ void TutorialGame::balanceBeam(const Vector3& position)
 	}
 
 }
+
 void TutorialGame::MovingPlatforms(const Vector3& position)
 {
 	//room layout
@@ -408,7 +439,6 @@ void TutorialGame::MovingPlatforms(const Vector3& position)
 
 	AddCubeToWorld(position + Vector3(-20, 10, -829), Vector3(1, 10, 30), 0.1, 0);
 	AddCubeToWorld(position + Vector3(20, 10, -829), Vector3(1, 10, 30), 0.1, 0);
-	AddCubeToWorld(position + Vector3(0, 10, -859), Vector3(20, 10, 1), 0.1, 0);
 	AddCubeToWorld(position + Vector3(0, 0, -829), Vector3(20, 1, 30), 0.1, 0);
 
 	Vector3 bottomLeft = Vector3(-50, 0, -770);
@@ -419,8 +449,6 @@ void TutorialGame::MovingPlatforms(const Vector3& position)
 		world->AddConstraint(constraint);
 	}
 
-
-
 	for (int i = 0; i < 5; i++)
 	{
 		for (int j = 0; j < 5; j++)
@@ -429,7 +457,6 @@ void TutorialGame::MovingPlatforms(const Vector3& position)
 				AddBonusToWorld(position + Vector3((j - 2) * 30, 5, -700 - ((i -2) * 40)));
 		}
 	}
-
 
 	for (int i = 0; i < 5; i++)
 	{
@@ -442,7 +469,39 @@ void TutorialGame::MovingPlatforms(const Vector3& position)
 
 }
 
+void TutorialGame::initDoubleCourse()
+{
+	Vector3 origin = Vector3(0, 0, 0);
+	lockedObject = AddPlayerToWorld(origin + Vector3(0, 7, -10));
 
+	raceWay(origin);
+
+	GameObject* finishLine = AddCubeToWorld(origin + Vector3(0, 10, -800), Vector3(20, 10, 1), 0.1, 0);;
+	finishLine->SetType(finish);
+	finishLine->GetRenderObject()->SetColour(Vector4(0, 1, 1, 0.0f));
+}
+
+void TutorialGame::raceWay(const Vector3& position)
+{
+	//room layout
+	AddCubeToWorld(position + Vector3(-20, 10, -400), Vector3(1, 10, 400), 0.1, 0);
+	AddCubeToWorld(position + Vector3(20, 10, -400), Vector3(1, 10, 400), 0.1, 0);
+	AddCubeToWorld(position + Vector3(0, 0, -400), Vector3(20, 2, 400), 0.1, 0);
+	AddCubeToWorld(position + Vector3(0, 10, 1), Vector3(20, 10, 1), 0.1, 0);
+
+	for (int i = 0; i < 10; i++)
+	{
+		// -20;
+		AddCubeToWorld(position + Vector3(rand() % 20, 10, -40 - (i * 70)), Vector3(15, 10, 1), 0.1, 0);
+		//AddCubeToWorld(position + Vector3(10, 10, -20 - (i * 50)), Vector3(10, 10, 1), 0.1, 0);
+	}
+
+}
+
+void TutorialGame::obstacleWay(const Vector3& position)
+{
+
+}
 
 void TutorialGame::BridgeConstraintTest()
 {
@@ -474,7 +533,6 @@ void TutorialGame::BridgeConstraintTest()
 	world -> AddConstraint(constraint);
 
 }
-
 
 /*
 
@@ -579,6 +637,31 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 	return cube;
 }
 
+GameObject* TutorialGame::AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, float elasticity, float inverseMass)
+{
+	GameObject* cube = new GameObject();
+
+	OBBVolume* volume = new OBBVolume(dimensions);
+
+	cube->SetBoundingVolume((CollisionVolume*)volume);
+
+	cube->GetTransform()
+		.SetPosition(position)
+		.SetScale(dimensions * 2);
+
+	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, basicTex, basicShader));
+	cube->SetPhysicsObject(new PhysicsObject(&cube->GetTransform(), cube->GetBoundingVolume()));
+
+	cube->GetPhysicsObject()->SetInverseMass(inverseMass);
+	cube->GetPhysicsObject()->InitCubeInertia();
+
+	cube->GetPhysicsObject()->setElasticity(elasticity);
+
+	world->AddGameObject(cube);
+
+	return cube;
+}
+
 void TutorialGame::InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius) {
 	for (int x = 0; x < numCols; ++x) {
 		for (int z = 0; z < numRows; ++z) {
@@ -624,6 +707,14 @@ void TutorialGame::InitGameExamples() {
 	AddPlayerToWorld(Vector3(0, 5, 0));
 	AddEnemyToWorld(Vector3(5, 5, 0));
 	AddBonusToWorld(Vector3(10, 3, 0));
+
+	AddOBBCubeToWorld(Vector3(15, 3, 0), Vector3(1, 1, 1), 0.5f);
+
+	AddCubeToWorld(Vector3(20, 3, 0), Vector3(1, 1, 1), 0.5f);
+
+	AddSphereToWorld(Vector3(25, 3, 0), 2.0f, 0.5f);
+
+	AddCapsuleToWorld(Vector3(30, 3, 0), 1.0f, 0.5);
 }
 
 GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
@@ -855,6 +946,7 @@ SpeedBlock* TutorialGame::AddSpeedBlock(const Vector3& position)
 
 	return cube;
 }
+
 /*
 
 Every frame, this code will let you perform a raycast, to see if there's an object

@@ -126,6 +126,25 @@ bool CollisionDetection::RayOBBIntersection(const Ray&r, const Transform& worldT
 
 bool CollisionDetection::RayCapsuleIntersection(const Ray& r, const Transform& worldTransform, const CapsuleVolume& volume, RayCollision& collision) 
 {
+	Vector3 capsPos = worldTransform.GetPosition();
+	float cpasRadius = volume.GetRadius();
+
+	Vector3 rayPos = r.GetPosition();
+	Vector3 rayDir = r.GetDirection();
+
+	Vector3 dir = (capsPos - r.GetPosition());
+
+	float capsProj = Vector3::Dot(dir, r.GetDirection());
+
+	if (capsProj < 0.0f)
+	{
+		return false;
+	}
+
+	//probs wrong
+	//Vector3 B = worldTransform.GetPosition() + worldTransform.GetPosition().Normalised();
+	//Vector3 C = worldTransform.GetPosition() + Vector3::Cross(A, B);
+
 	return false;
 }
 
@@ -351,6 +370,10 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 		return SphereIntersection((SphereVolume&)*volA, transformA, (SphereVolume&)*volB, transformB, collisionInfo);
 	}
 
+	if (pairType == VolumeType::Capsule) {
+		return CapsuleIntersection((CapsuleVolume&)*volA, transformA, (CapsuleVolume&)*volB, transformB, collisionInfo);
+	}
+
 	if (pairType == VolumeType::OBB) {
 		return OBBIntersection((OBBVolume&)*volA, transformA, (OBBVolume&)*volB, transformB, collisionInfo);
 	}
@@ -364,6 +387,33 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 		return AABBSphereIntersection((AABBVolume&)*volB, transformB, (SphereVolume&)*volA, transformA, collisionInfo);
 	}
 
+	if (volA->type == VolumeType::OBB && volB->type == VolumeType::Sphere) 
+	{
+		return OBBShpereIntersection((OBBVolume&)*volA, transformA, (SphereVolume&)*volB, transformB, collisionInfo);
+	}
+
+	if (volA->type == VolumeType::Sphere && volB->type == VolumeType::OBB)
+	{
+		collisionInfo.a = b;
+		collisionInfo.b = a;
+		return OBBShpereIntersection((OBBVolume&)*volB, transformB, (SphereVolume&)*volA, transformA, collisionInfo);
+	
+	}
+
+	if (volA->type == VolumeType::OBB && volB->type == VolumeType::AABB)
+	{
+		return OBBAABBIntersection((OBBVolume&)*volA, transformA, (AABBVolume&)*volB, transformB, collisionInfo);
+
+	}
+
+	if (volA->type == VolumeType::AABB && volB->type == VolumeType::OBB)
+	{
+		collisionInfo.a = b;
+		collisionInfo.b = a;
+		return OBBAABBIntersection((OBBVolume&)*volB, transformB, (AABBVolume&)*volA, transformA, collisionInfo);
+
+	}
+
 	if (volA->type == VolumeType::Capsule && volB->type == VolumeType::Sphere) {
 		return SphereCapsuleIntersection((CapsuleVolume&)*volA, transformA, (SphereVolume&)*volB, transformB, collisionInfo);
 	}
@@ -371,6 +421,24 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 		collisionInfo.a = b;
 		collisionInfo.b = a;
 		return SphereCapsuleIntersection((CapsuleVolume&)*volB, transformB, (SphereVolume&)*volA, transformA, collisionInfo);
+	}
+
+	if (volA->type == VolumeType::Capsule && volB->type == VolumeType::AABB) {
+		return CapsuleAABBIntersection((CapsuleVolume&)*volA, transformA, (AABBVolume&)*volB, transformB, collisionInfo);
+	}
+	if (volA->type == VolumeType::Sphere && volB->type == VolumeType::Capsule) {
+		collisionInfo.a = b;
+		collisionInfo.b = a;
+		return CapsuleAABBIntersection((CapsuleVolume&)*volB, transformB, (AABBVolume&)*volA, transformA, collisionInfo);
+	}
+
+	if (volA->type == VolumeType::Capsule && volB->type == VolumeType::OBB) {
+		return CapsuleOBBIntersection((CapsuleVolume&)*volA, transformA, (OBBVolume&)*volB, transformB, collisionInfo);
+	}
+	if (volA->type == VolumeType::Sphere && volB->type == VolumeType::OBB) {
+		collisionInfo.a = b;
+		collisionInfo.b = a;
+		return CapsuleOBBIntersection((CapsuleVolume&)*volB, transformB, (OBBVolume&)*volA, transformA, collisionInfo);
 	}
 
 	return false;
@@ -495,6 +563,7 @@ bool CollisionDetection::AABBSphereIntersection(const AABBVolume& volumeA, const
 	return false;
 }
 
+//OBB/OBB Collisions
 bool CollisionDetection::OBBIntersection(
 	const OBBVolume& volumeA, const Transform& worldTransformA,
 	const OBBVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) 
@@ -504,9 +573,94 @@ bool CollisionDetection::OBBIntersection(
 	return false;
 }
 
+//OBB/AABB Collisions
+bool CollisionDetection::OBBAABBIntersection(
+	const OBBVolume& volumeA, const Transform& worldTransformA,
+	const AABBVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo)
+{
+
+	return false;
+}
+
+
+//OBB/Sphere Collisions
+bool CollisionDetection::OBBShpereIntersection(
+	const OBBVolume& volumeA, const Transform& worldTransformA,
+	const SphereVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo)
+{
+	Quaternion orientation = worldTransformA.GetOrientation();
+
+	Matrix3 transform = Matrix3(orientation);
+	Matrix3 invTransform = Matrix3(orientation.Conjugate());
+
+	Vector3 boxSize = volumeA.GetHalfDimensions();
+
+	Vector3 delta = worldTransformB.GetPosition() - worldTransformA.GetPosition();
+
+	delta = invTransform * delta;
+
+	Vector3 closestPointOnBox = Maths::Clamp( delta, -boxSize, boxSize);
+
+	Vector3 localPoint = delta - closestPointOnBox;
+	float distance = localPoint.Length();
+
+	if (distance < volumeB.GetRadius())
+	{//yes we're colliding!
+		Vector3 collisionNormal = localPoint.Normalised();
+		float penetration = (volumeB.GetRadius() - distance);
+
+		Vector3 localA =   closestPointOnBox ;// Vector3();
+		Vector3 localB = -collisionNormal * volumeB.GetRadius();
+
+		//localA = transform * localA;
+		
+		collisionNormal = transform * collisionNormal;
+		localA = transform * localA;
+		localB = transform * localB;
+
+		collisionInfo.AddContactPoint(localA, localB, collisionNormal, penetration);
+
+
+		return true;
+	}
+
+
+	return false;
+}
+
+//capsule/capsule
+bool CollisionDetection::CapsuleIntersection(const CapsuleVolume& volumeA, const Transform& worldTransformA,
+	const CapsuleVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo)
+{
+
+
+	return false;
+}
+
+//Sphere/Capsule Collisions
 bool CollisionDetection::SphereCapsuleIntersection(
 	const CapsuleVolume& volumeA, const Transform& worldTransformA,
 	const SphereVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) 
+{
+
+
+	return false;
+}
+
+//Capsule/AABB Collisions
+bool CollisionDetection::CapsuleAABBIntersection(
+	const CapsuleVolume& volumeA, const Transform& worldTransformA,
+	const AABBVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) 
+{
+
+
+	return false;
+}
+
+//Capsule/OBB Collisions
+bool CollisionDetection::CapsuleOBBIntersection(
+	const CapsuleVolume& volumeA, const Transform& worldTransformA,
+	const OBBVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo)
 {
 
 
