@@ -22,8 +22,8 @@ TutorialGame::TutorialGame()	{
 	testStateObject = nullptr;
 
 	tutorial = false;
-	singlePlayer = false;
-	twoPlayer = true;
+	singlePlayer = true;
+	twoPlayer = false;
 
 	Debug::SetRenderer(renderer);
 	InitialiseAssets();
