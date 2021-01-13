@@ -187,7 +187,7 @@ void TestBehaviourTree()
 
 class PauseScreen : public PushdownState 
 {
-	PushdownResult OnUpdate(float dt,PushdownState * *newState) override 
+	PushdownResult OnUpdate(float dt,PushdownState **newState) override 
 	{
 		if (Window::GetKeyboard() -> KeyPressed(KeyboardKeys::U)) 
 		{
@@ -206,7 +206,7 @@ class PauseScreen : public PushdownState
 class GameScreen : public PushdownState 
 {
 	PushdownResult OnUpdate(float dt,
-		PushdownState * *newState) override 
+		PushdownState **newState) override 
 	{
 		pauseReminder -= dt;
 		if (pauseReminder < 0) 

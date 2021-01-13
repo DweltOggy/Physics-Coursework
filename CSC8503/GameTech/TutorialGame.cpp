@@ -17,12 +17,12 @@ TutorialGame::TutorialGame()	{
 	physics		= new PhysicsSystem(*world);
 
 	forceMagnitude	= 10.0f;
-	useGravity		= true;
+	useGravity		= false;
 	inSelectionMode = false;
 	testStateObject = nullptr;
 
-	tutorial = false;
-	singlePlayer = true;
+	tutorial = true;
+	singlePlayer = false;
 	twoPlayer = false;
 
 	Debug::SetRenderer(renderer);
@@ -488,14 +488,6 @@ void TutorialGame::raceWay(const Vector3& position)
 	AddCubeToWorld(position + Vector3(20, 10, -400), Vector3(1, 10, 400), 0.1, 0);
 	AddCubeToWorld(position + Vector3(0, 0, -400), Vector3(20, 2, 400), 0.1, 0);
 	AddCubeToWorld(position + Vector3(0, 10, 1), Vector3(20, 10, 1), 0.1, 0);
-
-	for (int i = 0; i < 10; i++)
-	{
-		// -20;
-		AddCubeToWorld(position + Vector3(rand() % 20, 10, -40 - (i * 70)), Vector3(15, 10, 1), 0.1, 0);
-		//AddCubeToWorld(position + Vector3(10, 10, -20 - (i * 50)), Vector3(10, 10, 1), 0.1, 0);
-	}
-
 }
 
 void TutorialGame::obstacleWay(const Vector3& position)
@@ -714,7 +706,7 @@ void TutorialGame::InitGameExamples() {
 
 	AddSphereToWorld(Vector3(25, 3, 0), 2.0f, 0.5f);
 
-	AddCapsuleToWorld(Vector3(30, 3, 0), 1.0f, 0.5);
+	AddCapsuleToWorld(Vector3(30, 3, 0), 3.0f, 1.5f);
 }
 
 GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {

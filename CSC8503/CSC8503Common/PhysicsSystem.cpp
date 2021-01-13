@@ -20,8 +20,8 @@ and the forces that are added to objects to change those positions
 */
 
 PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
-	applyGravity	= true;
-	useBroadPhase	= true;	
+	applyGravity	= false;
+	useBroadPhase	= false;	
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
 	linearDamping	= 2.0f;
