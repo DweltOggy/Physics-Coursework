@@ -210,7 +210,7 @@ void TutorialGame::LockedObjectMovement() {
 	{
 		force = 1.0f;
 		turnSpeed = 1.0f;
-		jumpForce = 600.0f;
+		jumpForce = 60.0f;
 	}
 	else
 	{
@@ -704,15 +704,15 @@ void TutorialGame::InitGameExamples() {
 	AddEnemyToWorld(Vector3(5, 5, 0));
 	AddBonusToWorld(Vector3(10, 3, 0));
 
-	AddOBBCubeToWorld(Vector3(15, 3, 0), Vector3(1, 1, 1), 0.5f);
+	AddOBBCubeToWorld(Vector3(15, 10, 0), Vector3(1, 1, 1), 0.5f);
 
-	AddCubeToWorld(Vector3(20, 3, 0), Vector3(1, 1, 1), 0.5f);
+	AddCubeToWorld(Vector3(20, 10, 0), Vector3(1, 1, 1), 0.5f);
 
-	AddSphereToWorld(Vector3(25, 3, 0), 2.0f, 0.5f);
+	AddSphereToWorld(Vector3(25, 10, 0), 2.0f, 0.5f);
 
-	AddCapsuleToWorld(Vector3(30, 4, 0), 3.0f, 1.5f);
+	AddCapsuleToWorld(Vector3(30, 10, 0), 3.0f, 1.5f);
 
-	AddCapsuleToWorld(Vector3(35, 4, 0), 3.0f, 1.5f);
+	AddCapsuleToWorld(Vector3(35, 10, 0), 3.0f, 1.5f);
 }
 
 GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
