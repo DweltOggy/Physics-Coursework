@@ -17,7 +17,7 @@ void BonusGameObject::OnCollisionBegin(GameObject* otherObject)
 
 void BonusGameObject::Update(float dt)
 {
-	float turnSpeed = 100.0f;
+	float turnSpeed = 100.0f * dt;
 	//a bit of spin for fun
 	physicsObject->AddTorque(Vector3(0, 1, 0) * turnSpeed);
 

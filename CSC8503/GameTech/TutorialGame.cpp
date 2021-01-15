@@ -214,7 +214,7 @@ void TutorialGame::LockedObjectMovement() {
 	}
 	else
 	{
-		force = 100.0f;
+		force = 200.0f;
 		turnSpeed = 30.0f;
 		jumpForce = 6000.0f;
 
@@ -577,6 +577,7 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 
 	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
 	sphere->GetPhysicsObject()->InitSphereInertia();
+	sphere->GetPhysicsObject()->SetFriction(0.01f);
 
 	world->AddGameObject(sphere);
 
@@ -595,6 +596,8 @@ GameObject* TutorialGame::AddCapsuleToWorld(const Vector3& position, float halfH
 
 	capsule->SetRenderObject(new RenderObject(&capsule->GetTransform(), capsuleMesh, basicTex, basicShader));
 	capsule->SetPhysicsObject(new PhysicsObject(&capsule->GetTransform(), capsule->GetBoundingVolume()));
+
+	capsule->GetPhysicsObject()->setElasticity(0.5);
 
 	capsule->GetPhysicsObject()->SetInverseMass(inverseMass);
 	capsule->GetPhysicsObject()->InitCubeInertia();
@@ -623,6 +626,7 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 	cube->GetPhysicsObject()->InitCubeInertia();
 
 	cube->GetPhysicsObject()->setElasticity(elasticity);
+	cube->GetPhysicsObject()->SetFriction(0.01f);
 
 	world->AddGameObject(cube);
 
@@ -706,7 +710,9 @@ void TutorialGame::InitGameExamples() {
 
 	AddSphereToWorld(Vector3(25, 3, 0), 2.0f, 0.5f);
 
-	AddCapsuleToWorld(Vector3(30, 3, 0), 3.0f, 1.5f);
+	AddCapsuleToWorld(Vector3(30, 4, 0), 3.0f, 1.5f);
+
+	AddCapsuleToWorld(Vector3(35, 4, 0), 3.0f, 1.5f);
 }
 
 GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
@@ -740,6 +746,7 @@ GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
 	character->GetPhysicsObject()->InitSphereInertia();
 
 	character->SetType(Players);
+	character->GetPhysicsObject()->SetFriction(0.15f);
 
 	world->AddGameObject(character);
 
@@ -771,6 +778,8 @@ GameObject* TutorialGame::AddEnemyToWorld(const Vector3& position) {
 
 	character->GetPhysicsObject()->SetInverseMass(inverseMass);
 	character->GetPhysicsObject()->InitSphereInertia();
+
+	character->GetPhysicsObject()->SetFriction(0.01f);
 
 	character->SetType(enemy);
 	world->AddGameObject(character);
@@ -876,6 +885,8 @@ GameObject* TutorialGame::AddStateSphereToWorld(const Vector3& position, float r
 	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
 	sphere->GetPhysicsObject()->InitSphereInertia();
 
+	sphere->GetPhysicsObject()->SetFriction(0.1f);
+
 	world->AddGameObject(sphere);
 
 	return sphere;
@@ -900,6 +911,8 @@ MovingPlatform* TutorialGame::AddMovingPlatform(const Vector3& position)
 
 	platform->GetPhysicsObject()->SetInverseMass(invMass);
 	platform->GetPhysicsObject()->InitCubeInertia();
+
+	platform->GetPhysicsObject()->SetFriction(0.99f);
 
 	world->AddGameObject(platform);
 
@@ -930,6 +943,8 @@ SpeedBlock* TutorialGame::AddSpeedBlock(const Vector3& position)
 	cube->GetPhysicsObject()->InitCubeInertia();
 
 	cube->GetPhysicsObject()->setElasticity(0.1);
+	cube->GetPhysicsObject()->SetFriction(0.0f);
+
 
 	FloatConstraint* constraint = new FloatConstraint(cube, position.y);
 	world->AddConstraint(constraint);

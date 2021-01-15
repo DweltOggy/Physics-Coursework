@@ -143,63 +143,36 @@ bool CollisionDetection::RayCapsuleIntersection(const Ray& r, const Transform& w
 
 		Vector3 topShpere = origin + up * (capsHalfHeight - capsRadius);
 		Vector3 bottomShpere = origin - up * (capsHalfHeight - capsRadius);
-
-		Vector3 vA = topShpere - P;
-		Vector3 vB = topShpere - origin;
-
-		float topTest = Vector3::Dot(vA, vB);
-
-		 vA = bottomShpere - P;
-		 vB = up;
-		float bottomTest = Vector3::Dot(vA, vB);
+		Vector3 d = origin + up * (Vector3::Dot(P - origin, up));
 
 		float distance = 0.0f;
-		Vector3 sphereOrigin;
-		if (topTest < 0)
+	
+		if (Vector3::Dot(topShpere - P, topShpere - P) < 0)
 		{
-			distance = (P - topShpere).Length();
-			if (distance < capsRadius)
-			{
-				sphereOrigin = topShpere;
-			}
-			else
-				collided = false;
+			distance = (topShpere - P).Length();
 		}
-		else if (bottomTest > 0)
+		else if ((Vector3::Dot(bottomShpere - P, bottomShpere - P) < 0))
 		{
-			distance = (P - bottomShpere).Length();
-			if (distance < capsRadius)
-			{
-				sphereOrigin = bottomShpere;
-			}
-			else
-				collided = false;
+			distance = (bottomShpere - P).Length();
 		}
-		else
+		else 
 		{
-			Vector3 d = origin + up * (Vector3::Dot(P - origin, up));
-			distance  = (P - d).Length();
-			if (distance < capsRadius)
-			{//collided
-				sphereOrigin = d;
-			}
-			else
-				collided = false;
+			distance  = (d - P).Length();
 		}
 
-		if (collided)
+		if (distance < capsRadius)
 		{
-			Vector3 dir = (sphereOrigin - r.GetPosition());
+			Vector3 dir = (origin - r.GetPosition());
 			float sphereProj = Vector3::Dot(dir, r.GetDirection());
 			Vector3 point = r.GetPosition() + (r.GetDirection() * sphereProj);
-			float sphereDist = (point - sphereOrigin).Length();
 			float offset = sqrt((capsRadius * capsRadius) - (distance * distance));
-			collision.rayDistance = distance - (offset);
+			collision.rayDistance = distance -(offset);
 			collision.collidedAt = r.GetPosition() + (r.GetDirection() * collision.rayDistance);
+			return true;
 		}
 	}
 
-	return collided;
+	return false;
 }
 
 bool CollisionDetection::RaySphereIntersection(const Ray&r, const Transform& worldTransform, const SphereVolume& volume, RayCollision& collision) 
@@ -471,6 +444,7 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 	if (volA->type == VolumeType::Capsule && volB->type == VolumeType::Sphere) {
 		return SphereCapsuleIntersection((CapsuleVolume&)*volA, transformA, (SphereVolume&)*volB, transformB, collisionInfo);
 	}
+
 	if (volA->type == VolumeType::Sphere && volB->type == VolumeType::Capsule) {
 		collisionInfo.a = b;
 		collisionInfo.b = a;
@@ -480,7 +454,8 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 	if (volA->type == VolumeType::Capsule && volB->type == VolumeType::AABB) {
 		return CapsuleAABBIntersection((CapsuleVolume&)*volA, transformA, (AABBVolume&)*volB, transformB, collisionInfo);
 	}
-	if (volA->type == VolumeType::Sphere && volB->type == VolumeType::Capsule) {
+
+	if (volA->type == VolumeType::AABB && volB->type == VolumeType::Capsule) {
 		collisionInfo.a = b;
 		collisionInfo.b = a;
 		return CapsuleAABBIntersection((CapsuleVolume&)*volB, transformB, (AABBVolume&)*volA, transformA, collisionInfo);
@@ -489,6 +464,13 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 	if (volA->type == VolumeType::Capsule && volB->type == VolumeType::OBB) {
 		return CapsuleOBBIntersection((CapsuleVolume&)*volA, transformA, (OBBVolume&)*volB, transformB, collisionInfo);
 	}
+
+	if (volA->type == VolumeType::OBB && volB->type == VolumeType::Capsule) {
+		collisionInfo.a = b;
+		collisionInfo.b = a;
+		return CapsuleOBBIntersection((CapsuleVolume&)*volB, transformB, (OBBVolume&)*volA, transformA, collisionInfo);
+	}
+
 	if (volA->type == VolumeType::Sphere && volB->type == VolumeType::OBB) {
 		collisionInfo.a = b;
 		collisionInfo.b = a;
@@ -663,11 +645,9 @@ bool CollisionDetection::OBBShpereIntersection(
 		Vector3 collisionNormal = localPoint.Normalised();
 		float penetration = (volumeB.GetRadius() - distance);
 
-		Vector3 localA =   closestPointOnBox ;// Vector3();
+		Vector3 localA =  closestPointOnBox;
 		Vector3 localB = -collisionNormal * volumeB.GetRadius();
 
-		//localA = transform * localA;
-		
 		collisionNormal = transform * collisionNormal;
 		localA = transform * localA;
 		localB = transform * localB;
@@ -683,7 +663,27 @@ bool CollisionDetection::OBBShpereIntersection(
 bool CollisionDetection::CapsuleIntersection(const CapsuleVolume& volumeA, const Transform& worldTransformA,
 	const CapsuleVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo)
 {
+	Vector3 capsPosA = worldTransformA.GetPosition();
+	float capsRadiusA = volumeA.GetRadius();
+	float capsHalfHeightA = volumeA.GetHalfHeight();
+	Vector3 capsUpA = worldTransformA.GetOrientation() * Vector3(0, 1, 0);
+	capsUpA.Normalise();
 
+	Vector3 topShpereA = capsPosA + capsUpA * (capsHalfHeightA - capsRadiusA);
+	Vector3 bottomShpereA = capsPosA - capsUpA * (capsHalfHeightA - capsRadiusA);
+
+
+	Vector3 capsPosB = worldTransformB.GetPosition();
+	float capsRadiusB = volumeB.GetRadius();
+	float capsHalfHeightB = volumeB.GetHalfHeight();
+	Vector3 capsUpB = worldTransformB.GetOrientation() * Vector3(0, 1, 0);
+	capsUpA.Normalise();
+
+	Vector3 topShpereB = capsPosB + capsUpB * (capsHalfHeightB - capsRadiusB);
+	Vector3 bottomShpereB = capsPosB - capsUpB * (capsHalfHeightB - capsRadiusB);
+
+	Vector3 dA = capsPosA + capsUpA * (Vector3::Dot(capsPosB - capsPosA, capsUpA));
+	Vector3 dB = capsPosB + capsUpB * (Vector3::Dot(capsPosA - capsPosB, capsUpB));
 
 	return false;
 }
@@ -694,6 +694,49 @@ bool CollisionDetection::SphereCapsuleIntersection(
 	const SphereVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) 
 {
 
+	Vector3 capsPos = worldTransformA.GetPosition();
+	float capsRadius = volumeA.GetRadius();
+	float capsHalfHeight = volumeA.GetHalfHeight();
+	Vector3 capsUp = worldTransformA.GetOrientation() * Vector3(0, 1, 0);
+	capsUp.Normalise();
+
+	Vector3 spherePos = worldTransformB.GetPosition();
+	float sphereRadius = volumeB.GetRadius();
+
+	float radii = volumeA.GetRadius() + volumeB.GetRadius();
+
+	Vector3 topShpere = capsPos + capsUp * (capsHalfHeight - capsRadius);
+	Vector3 bottomShpere = capsPos - capsUp * (capsHalfHeight - capsRadius);
+	Vector3 d = capsPos + capsUp * (Vector3::Dot(spherePos - capsPos, capsUp));
+
+	Vector3 delta = Vector3();
+
+
+	if (Vector3::Dot(topShpere - spherePos, topShpere - capsPos) < 0)
+	{
+		delta = spherePos - topShpere  ;
+		
+	}
+	else if (Vector3::Dot(bottomShpere - spherePos, bottomShpere - capsPos) < 0)
+	{
+		delta = spherePos - bottomShpere;
+	}
+	else
+	{
+		delta = spherePos - d;
+	}
+
+	float deltaLength = delta.Length();
+
+	if (deltaLength < radii)
+	{
+		float penetraion = (radii - deltaLength);
+		Vector3 normal = delta.Normalised();
+		Vector3 localA = normal * volumeA.GetRadius();
+		Vector3 localB = -normal * volumeB.GetRadius();
+		collisionInfo.AddContactPoint(localA, localB, normal, penetraion);
+		return true;
+	}
 
 	return false;
 }
@@ -703,9 +746,51 @@ bool CollisionDetection::CapsuleAABBIntersection(
 	const CapsuleVolume& volumeA, const Transform& worldTransformA,
 	const AABBVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) 
 {
+	Vector3 capsPos = worldTransformA.GetPosition();
+	float capsRadius = volumeA.GetRadius();
+	float capsHalfHeight = volumeA.GetHalfHeight();
+	Vector3 capsUp = worldTransformA.GetOrientation() * Vector3(0, 1, 0);
+	capsUp.Normalise();
 
+	Vector3 boxPos = worldTransformB.GetPosition();
+	Vector3 boxSize = volumeB.GetHalfDimensions();
 
+	Vector3 topShpere = capsPos + capsUp * (capsHalfHeight - capsRadius);
+	Vector3 bottomShpere = capsPos - capsUp * (capsHalfHeight - capsRadius);
+	Vector3 d = capsPos + capsUp * (Vector3::Dot(boxPos - capsPos, capsUp));
+
+	Vector3 delta = Vector3();
+
+	if (Vector3::Dot(topShpere - boxPos, topShpere - capsPos) < 0)
+	{
+		delta = boxPos - topShpere;
+
+	}
+	else if (Vector3::Dot(bottomShpere - boxPos, bottomShpere - capsPos) < 0)
+	{
+		delta = boxPos - bottomShpere;
+	}
+	else
+	{
+		delta = boxPos - d;
+	}
+	//Vector3 delta = boxPos - capsSphereOrigin;
+
+	Vector3 closestPointOnBox = Maths::Clamp(delta, -boxSize, boxSize);
+	Vector3 localPoint = delta - closestPointOnBox;
+	float distance = localPoint.Length();
+
+	if (distance < capsRadius)
+	{
+		Vector3 collisionNormal = localPoint.Normalised();
+		float penetration = (capsRadius - distance);
+		Vector3 localA = collisionNormal * capsRadius;
+		Vector3 localB = Vector3();
+		collisionInfo.AddContactPoint(localA, localB, collisionNormal, penetration);
+		return true;
+	}
 	return false;
+
 }
 
 //Capsule/OBB Collisions
@@ -713,7 +798,59 @@ bool CollisionDetection::CapsuleOBBIntersection(
 	const CapsuleVolume& volumeA, const Transform& worldTransformA,
 	const OBBVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo)
 {
+	Quaternion orientation = worldTransformB.GetOrientation();
+	Matrix3 invTransform = Matrix3(orientation.Conjugate());
 
+
+	Vector3 capsPos = worldTransformA.GetPosition();
+	float capsRadius = volumeA.GetRadius();
+	float capsHalfHeight = volumeA.GetHalfHeight();
+	Vector3 capsUp = worldTransformA.GetOrientation() * Vector3(0, 1, 0);
+	capsUp.Normalise();
+
+	Vector3 boxPos = worldTransformB.GetPosition();
+	Vector3 boxSize = volumeB.GetHalfDimensions();
+
+	Vector3 localCaps = invTransform * capsPos;
+	//Vector3 localUp = invTransform * capsUp;
+
+	Vector3 topShpere = localCaps + capsUp * (capsHalfHeight - capsRadius);
+	Vector3 bottomShpere = localCaps - capsUp * (capsHalfHeight - capsRadius);
+	Vector3 d = localCaps + capsUp * (Vector3::Dot(boxPos - localCaps, capsUp));
+
+	Vector3 delta = Vector3();
+
+	if (Vector3::Dot(topShpere - boxPos, topShpere - localCaps) < 0)
+	{
+		delta = boxPos - topShpere;
+
+	}
+	else if (Vector3::Dot(bottomShpere - boxPos, bottomShpere - localCaps) < 0)
+	{
+		delta = boxPos - bottomShpere;
+	}
+	else
+	{
+		delta = boxPos - d;
+	}
+	//delta = invTransform * delta;
+
+	Vector3 closestPointOnBox = Maths::Clamp(delta, -boxSize, boxSize);
+	Vector3 localPoint = delta - closestPointOnBox;
+	float distance = localPoint.Length();
+
+	if (distance < capsRadius)
+	{
+		Vector3 collisionNormal = localPoint.Normalised();
+		float penetration = (capsRadius - distance);
+		Vector3 localA = orientation * (collisionNormal * capsRadius);
+		Vector3 localB = orientation * closestPointOnBox;
+
+
+		collisionInfo.AddContactPoint(localA, localB, collisionNormal, penetration);
+		return true;
+	}
+	return false;
 
 	return false;
 }
