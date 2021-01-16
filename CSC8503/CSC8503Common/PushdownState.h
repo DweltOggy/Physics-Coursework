@@ -13,7 +13,7 @@ namespace NCL {
 			PushdownState();
 			virtual ~PushdownState();
 
-			virtual PushdownResult OnUpdate(float dt, PushdownState * *pushFunc) = 0;
+			virtual PushdownResult OnUpdate(float dt, PushdownState **pushFunc) = 0;
 
 			virtual void OnAwake() {} //By default do nothing
 			virtual void OnSleep() {} //By default do nothing

@@ -23,7 +23,6 @@ TutorialGame::TutorialGame()	{
 
 	tutorial = true;
 	singlePlayer = false;
-	twoPlayer = false;
 
 	Debug::SetRenderer(renderer);
 	InitialiseAssets();
@@ -55,7 +54,10 @@ void TutorialGame::InitialiseAssets() {
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
 	InitCamera();
-	InitWorld();
+	initStartMenu();
+	//InitWorld();
+	//InitSingleCourse();
+	//initDoubleCourse();
 }
 
 TutorialGame::~TutorialGame()	{
@@ -75,87 +77,100 @@ TutorialGame::~TutorialGame()	{
 }
 
 void TutorialGame::UpdateGame(float dt) {
-	if (!inSelectionMode) {
-		world->GetMainCamera()->UpdateCamera(dt);
-	}
-
-	UpdateKeys();
-
-	if (useGravity) {
-		Debug::Print("(G)ravity on", Vector2(5, 95));
-	}
-	else {
-		Debug::Print("(G)ravity off", Vector2(5, 95));
-	}
-
-
-	if (tutorial)
+	
+	if (!menu)
 	{
-		SelectObject();
-		MoveSelectedObject();
-	}
-
-	physics->Update(dt);
-
-	if (lockedObject != nullptr) {
-		Vector3 objPos	= lockedObject->GetTransform().GetPosition();
-		Vector3 objOrient	= lockedObject->GetTransform().GetOrientation() * lockedOffset;
-		Vector3 camPos	= objPos + objOrient;
-
-		Matrix4 temp = Matrix4::BuildViewMatrix(camPos, objPos, Vector3(0,1,0));
-
-		Matrix4 modelMat = temp.Inverse();
-
-		Quaternion q(modelMat);
-		Vector3 angles = q.ToEuler(); //nearly there now!
-
-		world->GetMainCamera()->SetPosition(camPos);
-		world->GetMainCamera()->SetPitch(-12.0f);
-		world->GetMainCamera()->SetYaw(angles.y);
-	}
-	if (player != nullptr)
-	{
-		int tempScore = player->getScore();
-		renderer->DrawString("Score: " + std::to_string(tempScore), Vector2(5, 10));
-
-		
-		if(player->lost)
+		if (!inSelectionMode) 
 		{
-			//gameOver = true;
-			renderer->DrawString("GAME OVER!", Vector2(30, 50),Vector4(1.0f,0.0f,0.0f,0.0f),50.0f);
+			world->GetMainCamera()->UpdateCamera(dt);
 		}
-		if (player->won)
+
+		UpdateKeys();
+
+		if (tutorial)
+		{
+			if (useGravity) {
+				Debug::Print("(G)ravity on", Vector2(5, 95));
+			}
+			else {
+				Debug::Print("(G)ravity off", Vector2(5, 95));
+			}
+	
+			SelectObject();
+			MoveSelectedObject();
+		}
+
+		if (lockedObject != nullptr) 
+		{
+			Vector3 objPos	= lockedObject->GetTransform().GetPosition();
+			Vector3 objOrient	= lockedObject->GetTransform().GetOrientation() * lockedOffset;
+			Vector3 camPos	= objPos + objOrient;
+
+			Matrix4 temp = Matrix4::BuildViewMatrix(camPos, objPos, Vector3(0,1,0));
+
+			Matrix4 modelMat = temp.Inverse();
+
+			Quaternion q(modelMat);
+			Vector3 angles = q.ToEuler(); //nearly there now!
+
+			world->GetMainCamera()->SetPosition(camPos);
+			world->GetMainCamera()->SetPitch(-12.0f);
+			world->GetMainCamera()->SetYaw(angles.y);
+		}
+
+		if (player != nullptr)
 		{
 			int tempScore = player->getScore();
-			renderer->DrawString("YOU WON!", Vector2(30, 50), Vector4(0.0f, 1.0f, 0.0f, 0.0f), 50.0f);
-			renderer->DrawString("your final Score: " + std::to_string(tempScore), Vector2(25, 60), Vector4(0.0f, 1.0f, 0.0f, 0.0f), 25.0f);
+			renderer->DrawString("Score: " + std::to_string(tempScore), Vector2(5, 10));
+
+		
+			if(player->lost)
+			{
+				//gameOver = true;
+				renderer->DrawString("GAME OVER!", Vector2(30, 50),Vector4(1.0f,0.0f,0.0f,0.0f),50.0f);
+				renderer->DrawString("Press F1 to retry or F3 to return to menu!", Vector2(25, 60), Vector4(1.0f, 0.0f, 0.0f, 0.0f), 25.0f);
+			}
+			if (player->won)
+			{
+				int tempScore = player->getScore();
+				renderer->DrawString("YOU WON!", Vector2(30, 50), Vector4(0.0f, 1.0f, 0.0f, 0.0f), 50.0f);
+				renderer->DrawString("your final Score: " + std::to_string(tempScore), Vector2(25, 60), Vector4(0.0f, 1.0f, 0.0f, 0.0f), 25.0f);
+				renderer->DrawString("Press F1 to retry or F3 to return to menu!", Vector2(15, 60), Vector4(1.0f, 0.0f, 0.0f, 0.0f), 25.0f);
+			}
 		}
-	}
 
-	if (testStateObject) 
+		if (testStateObject) 
+		{
+			testStateObject -> Update(dt);
+		}
+
+		physics->Update(dt);
+		world->UpdateWorld(dt);
+		
+	}
+	else
 	{
-		testStateObject -> Update(dt);
+		world->GetMainCamera()->SetPosition(Vector3(0, 0, 0));
+		renderer->DrawString("Main Menu", Vector2(30, 10), Vector4(1.0f, 0.5f, 0.5f, 0.0f), 50.0f);
+		renderer->DrawString("1. Testing ", Vector2(10, 20), Vector4(1.0f, 1.0f, 0.0f, 0.0f), 40.0f);
+		renderer->DrawString("2. SinglePlayer", Vector2(10, 40), Vector4(1.0f, 1.0f, 0.0f, 0.0f), 40.0f);
+		renderer->DrawString("3. MultiPlayer", Vector2(10, 60), Vector4(1.0f, 1.0f, 0.0f, 0.0f), 40.0f);
+		renderer->DrawString("4. Exit", Vector2(10, 80), Vector4(1.0f, 1.0f, 0.0f, 0.0f), 40.0f);
 	}
 
-	world->UpdateWorld(dt);
 	renderer->Update(dt);
-
 	Debug::FlushRenderables(dt);
 	renderer->Render();
 }
 
-void TutorialGame::UpdateKeys() {
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
-		InitWorld(); //We can reset the simulation at any time with F1
-		selectionObject = nullptr;
-		//lockedObject	= nullptr;
-	}
+void TutorialGame::UpdateKeys() 
+{
 
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2) && tutorial) {
 		InitCamera(); //F2 will reset the camera to a specific default place
 	}
 
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G) && tutorial) {
 		useGravity = !useGravity; //Toggle gravity!
 		physics->UseGravity(useGravity);
 	}
@@ -202,23 +217,23 @@ void TutorialGame::LockedObjectMovement() {
 
 	//Vector3 charForward  = lockedObject->GetTransform().GetOrientation() * Vector3(0, 0, 1);
 	//Vector3 charForward2 = lockedObject->GetTransform().GetOrientation() * Vector3(0, 0, 1);
-	float force = 0.0f;
-	float turnSpeed = 0.0f;
-	float jumpForce = 0.0f;
+	float force = 200.0f;
+	float turnSpeed = 300.0f;
+	float jumpForce = 6000.0f;
 	
-	if (tutorial)
-	{
-		force = 1.0f;
-		turnSpeed = 1.0f;
-		jumpForce = 60.0f;
-	}
-	else
-	{
-		force = 200.0f;
-		turnSpeed = 30.0f;
-		jumpForce = 6000.0f;
+	//if (tutorial)
+	//{
+	//	force = 1.0f;
+	//	turnSpeed = 1.0f;
+	//	jumpForce = 60.0f;
+	//}
+	//else
+	//{
+		//force = 200.0f;
+		//turnSpeed = 30.0f;
+		//jumpForce = 6000.0f;
 
-	}
+	//}
 
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
@@ -300,38 +315,65 @@ void TutorialGame::InitCamera() {
 	lockedObject = nullptr;
 }
 
-void TutorialGame::InitWorld() {
+void TutorialGame::initStartMenu()
+{
+	//InitCamera();
 	world->ClearAndErase();
 	physics->Clear();
 
+	selectionObject = nullptr;
+
+	useGravity = false;
+	physics->UseGravity(useGravity);
+
+	menu = true;
+	tutorial = false;
 	gameOver = false;
 
-	if(tutorial)
-	{
-		lockedObject = nullptr;
-		//InitMixedGridWorld(5, 5, 3.5f, 3.5f);
-		InitGameExamples();
-		InitDefaultFloor();
-		//BridgeConstraintTest();
-		//testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
-	}
-	else if (singlePlayer)
-	{
-		InitSingleCourse();
-	}
-	else if (twoPlayer)
-	{
-		initDoubleCourse();
-	}
-	else
-	{
-		InitDefaultFloor();
-	}
+	lockedObject = nullptr;
+
+	AddBonusToWorld(Vector3(0, 3, -10));
+}
+
+void TutorialGame::InitWorld() {
+	InitCamera();
+	world->ClearAndErase();
+	physics->Clear();
+
+	selectionObject = nullptr;
+
+	useGravity = false;
+	physics->UseGravity(useGravity);
+
+	gameOver = false;
+	tutorial = true;
+	menu = false;
+
 	
+	lockedObject = nullptr;
+	//InitMixedGridWorld(5, 5, 3.5f, 3.5f);
+	InitGameExamples();
+	InitDefaultFloor();
+	//BridgeConstraintTest();
+	//testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
+
 }
 
 void TutorialGame::InitSingleCourse()
 {
+	//InitCamera();
+	world->ClearAndErase();
+	physics->Clear();
+
+	selectionObject = nullptr;
+
+	useGravity = true;
+	physics->UseGravity(useGravity);
+
+	gameOver = false;
+	tutorial = false;
+	menu = false;
+
 	Vector3 origin = Vector3(0, 0, 0);
 
 	lockedObject = AddPlayerToWorld(origin + Vector3(0, 7, -10));
@@ -471,6 +513,19 @@ void TutorialGame::MovingPlatforms(const Vector3& position)
 
 void TutorialGame::initDoubleCourse()
 {
+	//InitCamera();
+	world->ClearAndErase();
+	physics->Clear();
+
+	selectionObject = nullptr;
+
+	useGravity = true;
+	physics->UseGravity(useGravity);
+
+	gameOver = false;
+	tutorial = false;
+	menu = false;
+
 	Vector3 origin = Vector3(0, 0, 0);
 	lockedObject = AddPlayerToWorld(origin + Vector3(0, 7, -10));
 

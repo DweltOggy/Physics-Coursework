@@ -20,13 +20,18 @@ namespace NCL {
 
 			virtual void UpdateGame(float dt);
 
+			void initStartMenu();
+			void InitWorld();
+			void InitSingleCourse();
+			void initDoubleCourse();
+
 		protected:
 			void InitialiseAssets();
 
 			void InitCamera();
 			void UpdateKeys();
 
-			void InitWorld();
+			
 
 			void InitGameExamples();
 
@@ -36,15 +41,13 @@ namespace NCL {
 			void InitDefaultFloor();
 			void BridgeConstraintTest();
 
-			void initStartMenu();
-			void InitReplayMenu();
+			
 
-			void InitSingleCourse();
 			void bouncyballJump(const Vector3& position);
 			void balanceBeam(const Vector3& position);
 			void MovingPlatforms(const Vector3& position);
 
-			void initDoubleCourse();
+			
 			void raceWay(const Vector3& position);
 			void obstacleWay(const Vector3& position);
 	
@@ -116,7 +119,7 @@ namespace NCL {
 
 			bool tutorial = false;
 			bool singlePlayer = true;
-			bool twoPlayer = false;
+			bool menu = false;
 			
 			Vector3 courseOffset = Vector3(0, 0, 0);
 

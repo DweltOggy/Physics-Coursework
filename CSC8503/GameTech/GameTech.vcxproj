@@ -143,6 +143,8 @@
   <ItemGroup>
     <ClCompile Include="BonusGameObject.cpp" />
     <ClCompile Include="FollowEnemy.cpp" />
+    <ClCompile Include="GameStateManager.cpp" />
+    <ClCompile Include="GameStates.cpp" />
     <ClCompile Include="GameTechRenderer.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MovingGameObject.cpp" />
@@ -155,7 +157,9 @@
   <ItemGroup>
     <ClInclude Include="BonusGameObject.h" />
     <ClInclude Include="FollowEnemy.h" />
+    <ClInclude Include="GameStateManager.h" />
     <ClInclude Include="GameTechRenderer.h" />
+    <ClInclude Include="GameStates.h" />
     <ClInclude Include="MovingGameObject.h" />
     <ClInclude Include="MovingPlatform.h" />
     <ClInclude Include="PlayerGameObject.h" />

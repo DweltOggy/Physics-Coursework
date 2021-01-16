@@ -16,6 +16,7 @@
 #include "../CSC8503Common/BehaviourNode.h"
 
 #include "TutorialGame.h"
+#include "GameStateManager.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -273,6 +274,7 @@ class IntroScreen : public PushdownState
 void TestPushdownAutomata(Window* w)
 {
 	PushdownMachine machine(new IntroScreen());
+	
 	while (w -> UpdateWindow()) 
 	{
 		float dt = w -> GetTimer() -> GetTimeDeltaSeconds();
@@ -359,20 +361,23 @@ int main() {
 
 	//TestBehaviourTree();
 	Window*w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
-	//TestPushdownAutomata(w);
+	
 	if (!w->HasInitialised()) {
 		return -1;
-	}	
+	}
+	//TestPushdownAutomata(w);	
 	srand(time(0));
 	w->ShowOSPointer(false);
 	w->LockMouseToWindow(true);
 
-	TutorialGame* g = new TutorialGame();
+	//TutorialGame* g = new TutorialGame();
+	GameStateManager* g = new GameStateManager();
 
 	//TestPathfinding();
-
+	
 	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
-	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
+	while (w->UpdateWindow() && g->isRunning())//!Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE 
+	{
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
 		if (dt > 0.1f) {
 			std::cout << "Skipping large time delta" << std::endl;
@@ -391,7 +396,7 @@ int main() {
 
 		w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 
-		g->UpdateGame(dt);
+		g->Update(dt);
 
 		//TestStateMachine();
 		//DisplayPathfinding();
