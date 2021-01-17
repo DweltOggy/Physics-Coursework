@@ -28,7 +28,7 @@ PushdownState::PushdownResult menuState::OnUpdate(float dt, PushdownState** newS
 	{
 		return PushdownResult::Pop;
 	}
-	g->UpdateGame(dt);
+	return PushdownResult::NoChange;
 }
 
 void menuState::OnAwake()
@@ -39,7 +39,7 @@ void menuState::OnAwake()
 
 PushdownState::PushdownResult singlePlayerState::OnUpdate(float dt, PushdownState** newState)
 {
-	g->UpdateGame(dt);
+	
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::F1))
 	{
 		g->InitSingleCourse();
@@ -52,7 +52,7 @@ PushdownState::PushdownResult singlePlayerState::OnUpdate(float dt, PushdownStat
 	{
 		return PushdownResult::Pop;
 	}
-	
+
 	return PushdownResult::NoChange;
 }
 
@@ -64,7 +64,7 @@ void singlePlayerState::OnAwake()
 
 PushdownState::PushdownResult twoPlayerState::OnUpdate(float dt, PushdownState** newState)
 {	
-	g->UpdateGame(dt);
+	
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::F1))
 	{
 		g->initDoubleCourse();
@@ -77,7 +77,7 @@ PushdownState::PushdownResult twoPlayerState::OnUpdate(float dt, PushdownState**
 	{
 		return PushdownResult::Pop;
 	}
-	
+
 	return PushdownResult::NoChange;
 }
 
@@ -89,7 +89,7 @@ void twoPlayerState::OnAwake()
 
 PushdownState::PushdownResult TestState::OnUpdate(float dt, PushdownState** newState)
 {	
-	g->UpdateGame(dt);
+	
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::F1))
 	{
 		g->InitWorld();
@@ -102,7 +102,7 @@ PushdownState::PushdownResult TestState::OnUpdate(float dt, PushdownState** newS
 	{
 		return PushdownResult::Pop;
 	}
-	
+
 	return PushdownResult::NoChange;
 }
 

@@ -376,7 +376,7 @@ int main() {
 	//TestPathfinding();
 	
 	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
-	while (w->UpdateWindow() && g->isRunning())//!Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE 
+	while (w->UpdateWindow() && g->isRunning())//!Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE) 
 	{
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
 		if (dt > 0.1f) {
@@ -397,6 +397,7 @@ int main() {
 		w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 
 		g->Update(dt);
+		//g->UpdateGame(dt);
 
 		//TestStateMachine();
 		//DisplayPathfinding();

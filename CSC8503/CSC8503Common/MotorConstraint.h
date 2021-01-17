@@ -12,9 +12,6 @@ namespace NCL
 			MotorConstraint(GameObject* a, GameObject* b, float d)
 			{
 				objectA = a;
-				objectB = b;
-				distance = d;
-
 			}
 			~MotorConstraint() {}
 
@@ -22,7 +19,6 @@ namespace NCL
 
 		protected:
 			GameObject* objectA;
-			GameObject* objectB;
 
 			float distance;
 		};

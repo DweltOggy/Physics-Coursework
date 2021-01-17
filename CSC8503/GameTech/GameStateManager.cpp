@@ -16,11 +16,10 @@ GameStateManager::~GameStateManager()
 
 void GameStateManager::Update(float dt)
 {
-	//g->UpdateGame(dt);
+	g->UpdateGame(dt);
 	if (!machine->Update(dt))
 	{
 		running = false;
 	}
-	//running = machine->Update(dt);
-	//g->UpdateGame(dt);
+
 }
