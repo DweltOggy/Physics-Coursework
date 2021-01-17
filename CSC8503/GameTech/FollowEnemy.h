@@ -1,39 +1,45 @@
 #pragma once
 #include "..\CSC8503Common\GameObject.h"
+#include "PlayerGameObject.h"
+#include "..\CSC8503Common\GameWorld.h"
 
 namespace NCL
 {
 	namespace CSC8503
 	{
 		class StateMachine;
-		class FollowEnemy : public GameObject
+		class FollowEnemy : public PlayerGameObject// public GameObject 
 		{
 		public:
-			FollowEnemy();
+			FollowEnemy(GameWorld* a);
 			~FollowEnemy();
 
 			void setTarget(GameObject* a)
 			{
-				target = a;
+				exit = a;
 				relativePos =
-					target->GetTransform().GetPosition() - GetTransform().GetPosition();
+					exit->GetTransform().GetPosition() - GetTransform().GetPosition();
 
 				currentDistance = relativePos.Length();
 
 			}
-			void Update(float dt);
-			void OnCollisionBegin(GameObject* otherObject) override;
-			void followTarget(float dt);
+			void Update(float dt) override;
+			void seekExit(float dt);
+			void seekBonus(float dt);
 
 		protected:
 
 			StateMachine* stateMachine;
-			GameObject* target;
+			GameObject* nearestBonus;
+			GameObject* exit;
+
+			GameWorld* worldRef;
 
 			Vector3 relativePos;
 
 			float distance;
 			float currentDistance;
+			
 		};
 	}
 }

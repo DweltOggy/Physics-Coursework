@@ -21,6 +21,7 @@ GameWorld::~GameWorld()	{
 
 void GameWorld::Clear() {
 	gameObjects.clear();
+	bonuses.clear();
 	constraints.clear();
 }
 
@@ -128,4 +129,33 @@ void GameWorld::GetConstraintIterators(
 	std::vector<Constraint*>::const_iterator& last) const {
 	first	= constraints.begin();
 	last	= constraints.end();
+}
+
+
+void GameWorld::AddBonus(GameObject* o)
+{
+	AddGameObject(o);
+	bonuses.emplace_back(o);
+}
+
+void GameWorld::RemoveBonus(GameObject* o)
+{
+	bonuses.erase(std::remove(gameObjects.begin(), gameObjects.end(), o), gameObjects.end());
+}
+
+GameObject* GameWorld::closestBonus(GameObject* o)
+{
+	GameObject* closest = nullptr;
+	float distance = 1000000.0f;
+	for (GameObject* i : bonuses)
+	{
+		Vector3 relativePos = i->GetTransform().GetPosition() - o->GetTransform().GetPosition();
+		if (distance > relativePos.Length() && i->IsActive())
+		{
+			distance = relativePos.Length();
+			closest = i;
+		}
+	}
+
+	return closest;
 }

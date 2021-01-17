@@ -283,6 +283,8 @@ Ray CollisionDetection::BuildRayFromMouse(const Camera& cam) {
 	return Ray(cam.GetPosition(), c);
 }
 
+
+
 //http://bookofhook.com/mousepick.pdf
 Matrix4 CollisionDetection::GenerateInverseProjection(float aspect, float fov, float nearPlane, float farPlane) {
 	Matrix4 m;

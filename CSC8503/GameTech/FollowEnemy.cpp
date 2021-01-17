@@ -6,40 +6,62 @@
 using namespace NCL;
 using namespace CSC8503;
 
-FollowEnemy::FollowEnemy()
+FollowEnemy::FollowEnemy(GameWorld* a)
 {
-	target = nullptr;
+	nearestBonus = nullptr;
+	exit = nullptr;
+	worldRef = a;
+	score = 600;
 	currentDistance = 0.0;
 	distance = 10.0f;
 
 	stateMachine = new StateMachine();
 
-	State* following = new State([&](float dt) -> void
+	State* seekExit = new State([&](float dt) -> void
 		{
-			this->followTarget(dt);
+			this->seekExit(dt);
 		}
 	);
-	State* waiting = new State([&](float dt) -> void
+	State* seekBonus = new State([&](float dt) -> void
+		{
+			this->seekBonus(dt);
+		}
+	);
+
+	State* seekPlayer = new State([&](float dt) -> void
 		{
 
 		}
 	);
 
+	
+	stateMachine->AddState(seekExit);
+	stateMachine->AddState(seekBonus);
 
-	stateMachine->AddState(following);
-	stateMachine->AddState(waiting);
-
-	stateMachine->AddTransition(new StateTransition(following, waiting,
+	stateMachine->AddTransition(new StateTransition(seekExit, seekBonus,
 		[&]() -> bool
 		{
-			return this->currentDistance < distance;
+			bool change = false;
+
+			if (this->getScore() < 500)
+			{
+				change = true;
+				nearestBonus = worldRef->closestBonus(this);
+
+				if (nearestBonus == nullptr)
+					change = false;
+			}
+			
+			return change;
 		}
 	));
 
-	stateMachine->AddTransition(new StateTransition(waiting, following,
+	stateMachine->AddTransition(new StateTransition(seekBonus, seekExit,
 		[&]() -> bool
 		{
-			return this->currentDistance > distance;
+			bool change = false;
+			change = !nearestBonus->IsActive();
+			return change;
 		}
 	));
 
@@ -52,23 +74,41 @@ FollowEnemy::~FollowEnemy()
 
 void FollowEnemy::Update(float dt)
 {
-	relativePos =
-		target->GetTransform().GetPosition() - GetTransform().GetPosition();
-	currentDistance = relativePos.Length();
+	if (isActive)
+	{
+		stateMachine->Update(dt);
 
-	stateMachine->Update(dt);
+		time += dt;
+		if (time > 1.0 && won == false)
+		{
+			removeScore(10);
+			time = 0;
+		}
+		if (getScore() <= 0)
+		{
+			isActive = false;
+			lost = true;
+		}
+	}
+
 }
-void FollowEnemy::followTarget(float dt)
+
+void FollowEnemy::seekExit(float dt)
 {
 	relativePos =
-		target->GetTransform().GetPosition() - GetTransform().GetPosition();
+		exit->GetTransform().GetPosition() - GetTransform().GetPosition();
 
 	Vector3 offsetDir = relativePos.Normalised();
 
 	GetPhysicsObject()->AddForce(offsetDir * 100.0f );
 }
 
-void FollowEnemy::OnCollisionBegin(GameObject* otherObject)
+void FollowEnemy::seekBonus(float dt)
 {
+	relativePos =
+		nearestBonus->GetTransform().GetPosition() - GetTransform().GetPosition();
 
+	Vector3 offsetDir = relativePos.Normalised();
+
+	GetPhysicsObject()->AddForce(offsetDir * 100.0f);
 }

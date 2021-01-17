@@ -68,7 +68,7 @@ namespace NCL {
 			GameObject* AddPlayerToWorld(const Vector3& position);
 			GameObject* AddEnemyToWorld(const Vector3& position);
 
-			FollowEnemy* AddFollowEnemyToWorld(const Vector3& position);
+			FollowEnemy* AddFollowEnemyToWorld(const Vector3& position, GameObject* target);
 
 			GameObject* AddBonusToWorld(const Vector3& position);
 

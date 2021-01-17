@@ -53,11 +53,18 @@ namespace NCL {
 				std::vector<Constraint*>::const_iterator& first,
 				std::vector<Constraint*>::const_iterator& last) const;
 
+			//bonus list for AI finding
+			void AddBonus(GameObject* o);
+			void RemoveBonus(GameObject* o);
+			GameObject* closestBonus(GameObject* o);
+
 		protected:
 			std::vector<GameObject*> gameObjects;
 			std::vector<Constraint*> constraints;
 
 			Camera* mainCamera;
+
+			std::vector<GameObject*> bonuses;
 
 			bool	shuffleConstraints;
 			bool	shuffleObjects;

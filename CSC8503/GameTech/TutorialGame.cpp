@@ -511,13 +511,16 @@ void TutorialGame::initDoubleCourse()
 
 	Vector3 origin = Vector3(0, 0, 0);
 	lockedObject = AddPlayerToWorld(origin + Vector3(0, 7, -10));
-	AddFollowEnemyToWorld(origin + Vector3(0, 7, -2));
+	
 
 	raceWay(origin);
 
 	GameObject* finishLine = AddCubeToWorld(origin + Vector3(0, 10, -700), Vector3(20, 10, 1), 0.1, 0);;
 	finishLine->SetType(finish);
 	finishLine->GetRenderObject()->SetColour(Vector4(0, 1, 1, 0.0f));
+	
+	AddFollowEnemyToWorld(origin + Vector3(0, 7, -2), finishLine);
+
 }
 
 void TutorialGame::raceWay(const Vector3& position)
@@ -539,9 +542,9 @@ void TutorialGame::raceWay(const Vector3& position)
 	}
 
 	//place bonuses
-	for (int i = 0; i < 18; i++)
+	for (int i = 0; i < 10; i++)
 	{
-		AddBonusToWorld(position + Vector3((rand() % 30) - 15, 5, -20 - (i * 40)));
+		AddBonusToWorld(position + Vector3((rand() % 30) - 15, 5, -20 - (i * 70)));
 	}
 }
 
@@ -842,12 +845,12 @@ GameObject* TutorialGame::AddEnemyToWorld(const Vector3& position) {
 	return character;
 }
 
-FollowEnemy* TutorialGame::AddFollowEnemyToWorld(const Vector3& position)
+FollowEnemy* TutorialGame::AddFollowEnemyToWorld(const Vector3& position, GameObject* target)
 {
 	float meshSize = 3.0f;
 	float inverseMass = 0.5f;
 
-	FollowEnemy* character = new FollowEnemy();
+	FollowEnemy* character = new FollowEnemy(world);
 
 	AABBVolume* volume = new AABBVolume(Vector3(0.3f, 0.9f, 0.3f) * meshSize);
 	character->SetBoundingVolume((CollisionVolume*)volume);
@@ -866,8 +869,8 @@ FollowEnemy* TutorialGame::AddFollowEnemyToWorld(const Vector3& position)
 	character->GetPhysicsObject()->SetInverseMass(inverseMass);
 	character->GetPhysicsObject()->InitSphereInertia();
 
-	character->setTarget(player);
-	character->SetType(enemy);
+	character->setTarget(target);
+	character->SetType(Players);
 	world->AddGameObject(character);
 
 	return character;
@@ -895,7 +898,7 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 	FloatConstraint* constraint = new FloatConstraint(apple, position.y);
 	world->AddConstraint(constraint);
 
-	world->AddGameObject(apple);
+	world->AddBonus(apple);
 
 	return apple;
 }
