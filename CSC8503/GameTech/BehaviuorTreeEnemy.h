@@ -2,17 +2,23 @@
 #include "..\CSC8503Common\GameObject.h"
 #include "PlayerGameObject.h"
 #include "..\CSC8503Common\GameWorld.h"
+#include "../CSC8503Common/BehaviourAction.h"
+#include "../CSC8503Common/BehaviourSequence.h"
+#include "../CSC8503Common/BehaviourSelector.h"
+#include "../CSC8503Common/BehaviourNodeWithChildren.h"
+#include "../CSC8503Common/BehaviourNode.h"
+
 
 namespace NCL
 {
 	namespace CSC8503
 	{
-		class StateMachine;
-		class FollowEnemy : public PlayerGameObject// public GameObject 
+
+		class BehaviuorTreeEnemy : public PlayerGameObject
 		{
 		public:
-			FollowEnemy(GameWorld* a);
-			~FollowEnemy();
+			BehaviuorTreeEnemy(GameWorld* a);
+			~BehaviuorTreeEnemy();
 
 			void setTarget(GameObject* a)
 			{
@@ -23,22 +29,25 @@ namespace NCL
 			}
 
 			void Update(float dt) override;
-			void seekExit(float dt);
-			void seekBonus(float dt);
-			void seekPlayer(float dt);
 
 		protected:
 
-			StateMachine* stateMachine;
+			BehaviourSequence* rootSequence;
+			BehaviourSequence* sequence;
+			BehaviourSelector* selection;
+
 			GameObject* nearestBonus;
 			GameObject* exit;
 
 			GameWorld* worldRef;
 			Vector3 relativePos;
 
+			BehaviourState state = Ongoing;
 
 			int scoreTolereance;
-			
+
+
 		};
+
 	}
 }

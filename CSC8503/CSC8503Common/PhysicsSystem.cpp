@@ -286,25 +286,27 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	physB -> ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
 
 
-	//float cFriction = physA->getFriction() * physB->getFriction();
+	float cFriction = physA->getFriction() * physB->getFriction();
 
-	//Vector3 tangent = contactVelocity - (p.normal * Vector3::Dot(contactVelocity,p.normal));
+	Vector3 tangent = contactVelocity - (p.normal * Vector3::Dot(contactVelocity,p.normal));
 
-	//Vector3 TinertiaA = Vector3::Cross(physA->GetInertiaTensor() * Vector3::Cross(relativeA, tangent), relativeA);
-	//Vector3 TinertiaB = Vector3::Cross(physB->GetInertiaTensor() * Vector3::Cross(relativeB, tangent), relativeB);
+	Vector3 TinertiaA = Vector3::Cross(physA->GetInertiaTensor() * Vector3::Cross(relativeA, tangent), relativeA);
+	Vector3 TinertiaB = Vector3::Cross(physB->GetInertiaTensor() * Vector3::Cross(relativeB, tangent), relativeB);
 
-	//float TangularEffect = Vector3::Dot(TinertiaA + TinertiaB, tangent);
-	//
-	//float jt = (-(Vector3::Dot(contactVelocity * cFriction, tangent)) / (totalMass + TangularEffect));
-	//// -(Vector3::Dot(contactVelocity * cFriction, tangent)
-	//// -(cFriction * Vector3::Dot( contactVelocity, tangent)
-	//
-	//Vector3 frictionImpulse = tangent.Normalised() * jt;
-	//physA->ApplyLinearImpulse(-frictionImpulse);
-	//physB->ApplyLinearImpulse(frictionImpulse);
+	float TangularEffect = Vector3::Dot(TinertiaA + TinertiaB, tangent);
+	
+	float jt = -(cFriction * Vector3::Dot(contactVelocity, tangent.Normalised()) / (totalMass + TangularEffect));
 
-	//physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -frictionImpulse));
-	//physB->ApplyAngularImpulse(Vector3::Cross(relativeB, frictionImpulse));
+
+	// -(Vector3::Dot(contactVelocity * cFriction, tangent)
+	// -(cFriction * Vector3::Dot( contactVelocity, tangent)
+	
+	Vector3 frictionImpulse = tangent.Normalised() * jt;
+	physA->ApplyLinearImpulse(-frictionImpulse);
+	physB->ApplyLinearImpulse(frictionImpulse);
+
+	physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -frictionImpulse));
+	physB->ApplyAngularImpulse(Vector3::Cross(relativeB, frictionImpulse));
 
 }
 

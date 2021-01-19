@@ -7,6 +7,7 @@
 #include "MovingGameObject.h"
 #include "MovingPlatform.h"
 #include "FollowEnemy.h"
+#include "BehaviuorTreeEnemy.h"
 #include "SpeedBlock.h"
 
 namespace NCL {
@@ -69,6 +70,7 @@ namespace NCL {
 			GameObject* AddEnemyToWorld(const Vector3& position);
 
 			FollowEnemy* AddFollowEnemyToWorld(const Vector3& position, GameObject* target);
+			BehaviuorTreeEnemy* AddBehaviourToWorld(const Vector3& position, GameObject* target);
 
 			GameObject* AddBonusToWorld(const Vector3& position);
 

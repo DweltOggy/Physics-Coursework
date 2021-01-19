@@ -12,8 +12,7 @@ FollowEnemy::FollowEnemy(GameWorld* a)
 	exit = nullptr;
 	worldRef = a;
 	score = 600;
-	currentDistance = 0.0;
-	distance = 10.0f;
+	scoreTolereance = 100;
 
 	stateMachine = new StateMachine();
 
@@ -28,7 +27,7 @@ FollowEnemy::FollowEnemy(GameWorld* a)
 		}
 	);
 
-	State* seekPlayer = new State([&](float dt) -> void
+	State* harrasPlayer = new State([&](float dt) -> void
 		{
 
 		}
@@ -43,13 +42,20 @@ FollowEnemy::FollowEnemy(GameWorld* a)
 		{
 			bool change = false;
 
-			if (this->getScore() < 500)
+			if (this->getScore() < scoreTolereance)
 			{
 				change = true;
 				nearestBonus = worldRef->closestBonus(this);
 
+				if((exit->GetTransform().GetPosition() - GetTransform().GetPosition()).Length() <
+					(nearestBonus->GetTransform().GetPosition() - GetTransform().GetPosition()).Length())
+				{
+					change = false;
+				}	
+
 				if (nearestBonus == nullptr)
 					change = false;
+
 			}
 			
 			return change;
@@ -100,7 +106,7 @@ void FollowEnemy::seekExit(float dt)
 
 	Vector3 offsetDir = relativePos.Normalised();
 
-	GetPhysicsObject()->AddForce(offsetDir * 100.0f );
+	GetPhysicsObject()->AddForce(offsetDir * 100.0f);
 }
 
 void FollowEnemy::seekBonus(float dt)
@@ -111,4 +117,15 @@ void FollowEnemy::seekBonus(float dt)
 	Vector3 offsetDir = relativePos.Normalised();
 
 	GetPhysicsObject()->AddForce(offsetDir * 100.0f);
+}
+
+
+void FollowEnemy::seekBonus(float dt)
+{
+	//relativePos =
+	//	nearestBonus->GetTransform().GetPosition() - GetTransform().GetPosition();
+
+	//Vector3 offsetDir = relativePos.Normalised();
+
+	//GetPhysicsObject()->AddForce(offsetDir * 100.0f);
 }

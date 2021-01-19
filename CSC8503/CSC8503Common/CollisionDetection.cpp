@@ -509,11 +509,11 @@ bool CollisionDetection::AABBIntersection(const AABBVolume& volumeA, const Trans
 	if (overlap) 
 	{
 		static const Vector3 faces[6] =
-			{
+		{
 			Vector3(-1, 0, 0), Vector3(1, 0, 0),
-				Vector3(0, -1, 0), Vector3(0, 1, 0),
-				Vector3(0, 0, -1), Vector3(0, 0, 1),
-			};
+			Vector3(0, -1, 0), Vector3(0, 1, 0),
+			Vector3(0, 0, -1), Vector3(0, 0, 1),
+		};
 		
 		Vector3 maxA = boxAPos + boxASize;
 		Vector3 minA = boxAPos - boxASize;
@@ -606,9 +606,121 @@ bool CollisionDetection::OBBIntersection(
 	const OBBVolume& volumeA, const Transform& worldTransformA,
 	const OBBVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) 
 {
+	Quaternion orientationA = worldTransformA.GetOrientation();
+	Quaternion orientationB = worldTransformB.GetOrientation();
 
+	Vector3 boxASize = volumeA.GetHalfDimensions();
+	Vector3 boxBSize = volumeB.GetHalfDimensions();
+
+	Vector3 boxAPos = worldTransformA.GetPosition();
+	Vector3 boxBPos = worldTransformB.GetPosition();
+
+	bool overlap = false;
+
+	static const Vector3 faces[3] =
+	{
+		Vector3(1, 0, 0),
+		Vector3(0, 1, 0),
+		Vector3(0, 0, 1)
+	};
+
+	Vector3 Axis[15];
+
+	for (int i = 0; i < 3; i++)
+	{
+		Axis[i] = orientationA * faces[i];
+		Axis[i].Normalise();
+	}
+
+	//Vector3 OBBfacesB[3];
+
+	for (int i = 3; i < 6; i++)
+	{
+		Axis[i] = orientationB * faces[i - 3];
+		Axis[i].Normalise();
+	}
+
+	//Vector3 edges[9] =
+	//{
+	Axis[6] = Vector3::Cross(Axis[0], Axis[3]).Normalised();
+	Axis[7] = Vector3::Cross(Axis[0], Axis[4]).Normalised();
+	Axis[8] = Vector3::Cross(Axis[0], Axis[5]).Normalised();
+
+	Axis[9] = Vector3::Cross(Axis[1], Axis[3]).Normalised();
+	Axis[10] = Vector3::Cross(Axis[1], Axis[4]).Normalised();
+	Axis[11] = Vector3::Cross(Axis[1], Axis[5]).Normalised();
+
+	Axis[12] = Vector3::Cross(Axis[2], Axis[3]).Normalised();
+	Axis[13] = Vector3::Cross(Axis[2], Axis[4]).Normalised();
+	Axis[14] = Vector3::Cross(Axis[2], Axis[5]).Normalised();
+	//};
+
+	
+	Vector3 overLapAxis;
+	float penetration = FLT_MAX;
+	Vector3 contactA;
+	Vector3 contactB;
+
+	for (int i = 0; i < 15; i++)
+	{
+		Vector3 maxA = volumeA.OBBSupport(worldTransformA, Axis[i]) * boxASize;
+		Vector3 minA = volumeA.OBBSupport(worldTransformA, -Axis[i]) * boxASize;
+
+		Vector3 maxB = volumeB.OBBSupport(worldTransformB, Axis[i]) * boxBSize;
+		Vector3 minB = volumeB.OBBSupport(worldTransformB, -Axis[i]) * boxBSize;
+
+		Vector3 deltaAtoB = minA - boxBPos;
+		Vector3 deltaBtoB = minB - boxBPos;
+
+		if (deltaAtoB.Length() < deltaBtoB.Length())
+		{
+			overlap = true;
+			float tempPenetration = (maxB - minA).Length();
+
+			if (penetration > tempPenetration)
+			{
+				penetration = tempPenetration;
+				overLapAxis = Axis[i];
+
+				Vector3 maxAdist = boxAPos - maxA;
+				Vector3 minAdist = boxAPos - minA;
+
+				if (maxAdist.Length() < minAdist.Length()) 
+				{
+					contactA = maxA;
+				}
+				else
+				{
+					contactA = minA;
+				}
+
+				Vector3 maxBdist = boxBPos - maxB;
+				Vector3 minBdist = boxBPos - minB;
+
+				if (maxBdist.Length() < minBdist.Length())
+				{
+					contactB = maxB;
+				}
+				else
+				{
+					contactB = minB;
+				}
+			}	
+		}
+
+	}
+
+	if (overlap)
+	{
+
+		//contactB = contactB * -overLapAxis;
+		collisionInfo.AddContactPoint(Vector3(), Vector3(),overLapAxis, penetration);
+
+		return true;
+	}
 
 	return false;
+
 }
 
 //OBB/AABB Collisions
@@ -616,6 +728,69 @@ bool CollisionDetection::OBBAABBIntersection(
 	const OBBVolume& volumeA, const Transform& worldTransformA,
 	const AABBVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo)
 {
+	Quaternion orientationA = worldTransformA.GetOrientation();
+	Vector3 boxAPos = worldTransformA.GetPosition();
+	Vector3 boxBPos = worldTransformB.GetPosition();
+
+	Vector3 boxASize = volumeA.GetHalfDimensions();
+	Vector3 boxBSize = volumeB.GetHalfDimensions();
+
+	bool overlap = false;
+
+	static const Vector3 faces[3] =
+	{ 
+		Vector3(1, 0, 0), 
+		Vector3(0, 1, 0), 
+		Vector3(0, 0, 1)
+	};
+
+	Vector3 OBBfacesA[3];
+
+	for (int i = 0; i < 3; i++)
+	{
+		OBBfacesA[i] = orientationA * faces[i];
+		OBBfacesA[i].Normalise();
+	}
+
+	Vector3 edges[9] =
+	{
+		Vector3::Cross(faces[0], OBBfacesA[0]).Normalised(),
+		Vector3::Cross(faces[0], OBBfacesA[1]).Normalised(),
+		Vector3::Cross(faces[0], OBBfacesA[2]).Normalised(),
+
+		Vector3::Cross(faces[1], OBBfacesA[0]).Normalised(),
+		Vector3::Cross(faces[1], OBBfacesA[1]).Normalised(),
+		Vector3::Cross(faces[1], OBBfacesA[2]).Normalised(),
+
+		Vector3::Cross(faces[2], OBBfacesA[0]).Normalised(),
+		Vector3::Cross(faces[2], OBBfacesA[1]).Normalised(),
+		Vector3::Cross(faces[2], OBBfacesA[2]).Normalised()
+	};
+
+
+	/*for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			edges[i][j] = Vector3::Cross(faces[i], OBBfaces[j]).Normalised();
+		}
+	}*/
+
+	//Vector3 delta = posB - posA;
+	//Vector3 totalSize = halfSizeA + halfSizeB;
+
+	//if (abs(delta.x) < totalSize.x && abs(delta.y) < totalSize.y && abs(delta.z) < totalSize.z)
+	//{
+	//	return true;
+	//}
+	//return false;
+
+	if (overlap)
+	{
+
+
+		return true;
+	}
 
 	return false;
 }

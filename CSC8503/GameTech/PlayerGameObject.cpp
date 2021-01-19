@@ -41,6 +41,29 @@ void PlayerGameObject::Update(float dt)
 			isActive = false;
 			lost = true;
 		}
+		Vector3 fwdAxis = GetTransform().GetOrientation() * Vector3(0, 0, 1);
+
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
+			GetPhysicsObject()->AddForce(-fwdAxis * 100.0f);
+		}
+
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
+			GetPhysicsObject()->AddForce(fwdAxis * 100.0f);
+		}
+
+		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)) {
+			GetPhysicsObject()->AddForce(Vector3(0, 6000.0f, 0));// *jumpForce);
+		}
+
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D))
+		{
+			GetPhysicsObject()->AddTorque(-Vector3(0, 1, 0) * 30.0f);
+		}
+
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A))
+		{
+			GetPhysicsObject()->AddTorque(Vector3(0, 1, 0) * 30.0f);
+		}
 	}
 
 }

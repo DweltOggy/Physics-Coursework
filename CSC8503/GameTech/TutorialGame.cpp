@@ -23,7 +23,7 @@ TutorialGame::TutorialGame()	{
 
 	tutorial = true;
 	singlePlayer = false;
-
+	player = nullptr;
 	Debug::SetRenderer(renderer);
 	InitialiseAssets();
 }
@@ -86,7 +86,7 @@ void TutorialGame::UpdateGame(float dt) {
 		}
 
 		UpdateKeys();
-		if (lockedObject) 
+		if (lockedObject && tutorial) 
 		{
 			if (lockedObject->IsActive())
 				LockedObjectMovement(dt);
@@ -128,7 +128,7 @@ void TutorialGame::UpdateGame(float dt) {
 			world->GetMainCamera()->SetYaw(angles.y);
 		}
 
-		if (player != nullptr)
+		if (player != nullptr && !tutorial)
 		{
 			int tempScore = player->getScore();
 			renderer->DrawString("Score: " + std::to_string(tempScore), Vector2(5, 10));
@@ -217,9 +217,9 @@ void TutorialGame::LockedObjectMovement(float dt) {
 	fwdAxis.y = 0.0f;
 	fwdAxis.Normalise();
 
-	float force = 100.0f;
-	float turnSpeed = 30.0f ;
-	float jumpForce = 6000.0f ;
+	float force = 5.0f;
+	float turnSpeed = 5.0f ;
+	float jumpForce = 60.0f ;
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
 		lockedObject->GetPhysicsObject()->AddForce(-rightAxis * force);
@@ -239,6 +239,10 @@ void TutorialGame::LockedObjectMovement(float dt) {
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)) {
 		lockedObject->GetPhysicsObject()->AddForce(Vector3(0, jumpForce, 0));// *jumpForce);
+	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SHIFT)) {
+		lockedObject->GetPhysicsObject()->AddForce(Vector3(0, -jumpForce, 0));// *jumpForce);
 	}
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::E))
@@ -519,8 +523,8 @@ void TutorialGame::initDoubleCourse()
 	finishLine->SetType(finish);
 	finishLine->GetRenderObject()->SetColour(Vector4(0, 1, 1, 0.0f));
 	
-	AddFollowEnemyToWorld(origin + Vector3(0, 7, -2), finishLine);
-
+	AddFollowEnemyToWorld(origin + Vector3(10, 7, -2), finishLine);
+	AddBehaviourToWorld(origin + Vector3(-10, 7, -2), finishLine);
 }
 
 void TutorialGame::raceWay(const Vector3& position)
@@ -703,6 +707,8 @@ GameObject* TutorialGame::AddOBBCubeToWorld(const Vector3& position, Vector3 dim
 		.SetPosition(position)
 		.SetScale(dimensions * 2);
 
+	
+	cube->GetTransform().SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(0, 1, 0), 50.0f));
 	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, basicTex, basicShader));
 	cube->SetPhysicsObject(new PhysicsObject(&cube->GetTransform(), cube->GetBoundingVolume()));
 
@@ -758,9 +764,12 @@ void TutorialGame::InitDefaultFloor() {
 }
 
 void TutorialGame::InitGameExamples() {
-	AddPlayerToWorld(Vector3(0, 5, 0));
-	AddEnemyToWorld(Vector3(5, 5, 0));
-	AddBonusToWorld(Vector3(10, 3, 0));
+	//AddPlayerToWorld(Vector3(0, 5, 0));
+	AddEnemyToWorld(Vector3(0, 5, 0));
+
+	AddBonusToWorld(Vector3(5, 3, 0));
+
+	AddOBBCubeToWorld(Vector3(10, 10, 0), Vector3(1, 1, 1), 0.5f);
 
 	AddOBBCubeToWorld(Vector3(15, 10, 0), Vector3(1, 1, 1), 0.5f);
 
@@ -782,6 +791,7 @@ GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
 	PlayerGameObject* character = new PlayerGameObject(name);
 
 	AABBVolume* volume = new AABBVolume(Vector3(0.3f, 0.85f, 0.3f) * meshSize);
+	//CapsuleVolume* volume = new CapsuleVolume(1.0f * meshSize, 1.0f*meshSize);
 
 	character->SetBoundingVolume((CollisionVolume*)volume);
 
@@ -804,7 +814,7 @@ GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
 	character->GetPhysicsObject()->InitSphereInertia();
 
 	character->SetType(Players);
-	character->GetPhysicsObject()->SetFriction(0.15f);
+	character->GetPhysicsObject()->SetFriction(0.1f);
 
 	world->AddGameObject(character);
 
@@ -876,6 +886,37 @@ FollowEnemy* TutorialGame::AddFollowEnemyToWorld(const Vector3& position, GameOb
 	return character;
 }
 
+BehaviuorTreeEnemy* TutorialGame::AddBehaviourToWorld(const Vector3& position, GameObject* target)
+{
+	float meshSize = 3.0f;
+	float inverseMass = 0.5f;
+
+	BehaviuorTreeEnemy* character = new BehaviuorTreeEnemy(world);
+
+	AABBVolume* volume = new AABBVolume(Vector3(0.3f, 0.9f, 0.3f) * meshSize);
+	character->SetBoundingVolume((CollisionVolume*)volume);
+
+
+
+	character->GetTransform()
+		.SetScale(Vector3(meshSize, meshSize, meshSize))
+		.SetPosition(position);
+
+	character->SetRenderObject(new RenderObject(&character->GetTransform(), enemyMesh, nullptr, basicShader));
+	character->GetRenderObject()->SetColour(Vector4(1, 0, 1, 1));
+
+	character->SetPhysicsObject(new PhysicsObject(&character->GetTransform(), character->GetBoundingVolume()));
+
+	character->GetPhysicsObject()->SetInverseMass(inverseMass);
+	character->GetPhysicsObject()->InitSphereInertia();
+
+	character->setTarget(target);
+	character->SetType(Players);
+	world->AddGameObject(character);
+
+	return character;
+}
+
 GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 	BonusGameObject* apple = new BonusGameObject();
 
@@ -890,7 +931,7 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 
 	apple->SetPhysicsObject(new PhysicsObject(&apple->GetTransform(), apple->GetBoundingVolume()));
 
-	apple->GetPhysicsObject()->SetInverseMass(1.0f);
+	apple->GetPhysicsObject()->SetInverseMass(0.5f);
 	apple->GetPhysicsObject()->InitSphereInertia();
 
 	apple->SetType(bonus);
@@ -970,7 +1011,7 @@ MovingPlatform* TutorialGame::AddMovingPlatform(const Vector3& position)
 	platform->GetPhysicsObject()->SetInverseMass(invMass);
 	platform->GetPhysicsObject()->InitCubeInertia();
 
-	platform->GetPhysicsObject()->SetFriction(0.99f);
+	platform->GetPhysicsObject()->SetFriction(2.0f);
 
 	world->AddGameObject(platform);
 

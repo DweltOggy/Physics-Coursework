@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BehaviuorTreeEnemy.cpp" />
     <ClCompile Include="BonusGameObject.cpp" />
     <ClCompile Include="FollowEnemy.cpp" />
     <ClCompile Include="GameStateManager.cpp" />
@@ -155,6 +156,7 @@
     <ClCompile Include="TutorialGame.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BehaviuorTreeEnemy.h" />
     <ClInclude Include="BonusGameObject.h" />
     <ClInclude Include="FollowEnemy.h" />
     <ClInclude Include="GameStateManager.h" />
