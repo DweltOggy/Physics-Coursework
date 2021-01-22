@@ -12,7 +12,7 @@
 
 namespace NCL {
 	namespace CSC8503 {
-		enum type {bonus, Players, enemy, obstacle, finish};
+		enum type {bonus, Players, enemy, platforms, finish};
 
 		class TutorialGame		{
 		public:
@@ -42,15 +42,10 @@ namespace NCL {
 			void InitDefaultFloor();
 			void BridgeConstraintTest();
 
-			
-
 			void bouncyballJump(const Vector3& position);
 			void balanceBeam(const Vector3& position);
 			void MovingPlatforms(const Vector3& position);
 
-			
-			void raceWay(const Vector3& position);
-			void obstacleWay(const Vector3& position);
 	
 			bool SelectObject();
 			void MoveSelectedObject();
@@ -60,9 +55,9 @@ namespace NCL {
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius,float elasticity, float inverseMass = 10.0f);
 			GameObject* AddStateSphereToWorld(const Vector3& position, float radius, float elasticity, float inverseMass = 10.0f);
-			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float elasticity, float inverseMass = 10.0f);
+			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float elasticity, float friction, Vector4 colour, float inverseMass = 10.0f);
 
-			GameObject* AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, float elasticity, float inverseMass = 10.0f);
+			GameObject* AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, float elasticity, float friction, Vector4 colour, float inverseMass = 10.0f);
 			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);
 

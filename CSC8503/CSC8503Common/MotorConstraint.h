@@ -9,7 +9,7 @@ namespace NCL
 		class MotorConstraint : public Constraint
 		{
 		public:
-			MotorConstraint(GameObject* a, GameObject* b, float d)
+			MotorConstraint(GameObject* a)
 			{
 				objectA = a;
 			}

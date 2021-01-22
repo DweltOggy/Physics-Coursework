@@ -38,7 +38,7 @@ MovingPlatform::MovingPlatform()
 	stateMachine->AddTransition(new StateTransition(forward, left,
 		[&]() -> bool
 		{
-			return GetTransform().GetPosition().z < -775;
+			return GetTransform().GetPosition().z < -780;
 		}
 	));
 
@@ -52,7 +52,7 @@ MovingPlatform::MovingPlatform()
 	stateMachine->AddTransition(new StateTransition(backward, right,
 		[&]() -> bool
 		{
-			return GetTransform().GetPosition().z > -625;
+			return GetTransform().GetPosition().z > -620;
 		}
 	));
 

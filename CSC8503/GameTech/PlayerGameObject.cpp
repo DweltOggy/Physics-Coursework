@@ -10,6 +10,7 @@ PlayerGameObject::PlayerGameObject(string name)
 	score = 1000;
 	won = false;
 	lost = false;
+	force = 200.0f;
 }
 
 void PlayerGameObject::OnCollisionBegin(GameObject* otherObject)
@@ -23,6 +24,19 @@ void PlayerGameObject::OnCollisionBegin(GameObject* otherObject)
 	{
 		won = true;
 		isActive = false;
+	}
+
+	if (otherObject->GetType() == platforms)
+	{
+		force = 500.0f;
+	}
+}
+
+void PlayerGameObject::OnCollisionEnd(GameObject* otherObject)
+{
+	if (otherObject->GetType() == platforms)
+	{
+		force = 200.0f;
 	}
 }
 
@@ -44,16 +58,16 @@ void PlayerGameObject::Update(float dt)
 		Vector3 fwdAxis = GetTransform().GetOrientation() * Vector3(0, 0, 1);
 
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
-			GetPhysicsObject()->AddForce(-fwdAxis * 100.0f);
+			GetPhysicsObject()->AddForce(-fwdAxis * force);
 		}
 
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
-			GetPhysicsObject()->AddForce(fwdAxis * 100.0f);
+			GetPhysicsObject()->AddForce(fwdAxis * force);
 		}
 
-		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)) {
-			GetPhysicsObject()->AddForce(Vector3(0, 6000.0f, 0));// *jumpForce);
-		}
+		//if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)) {
+		//	GetPhysicsObject()->AddForce(Vector3(0, 3000.0f, 0));// *jumpForce);
+		//}
 
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D))
 		{

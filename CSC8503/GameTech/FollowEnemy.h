@@ -22,6 +22,11 @@ namespace NCL
 
 			}
 
+			void setPlayer(PlayerGameObject* a)
+			{
+				player = a;
+			}
+
 			void Update(float dt) override;
 			void seekExit(float dt);
 			void seekBonus(float dt);
@@ -32,6 +37,7 @@ namespace NCL
 			StateMachine* stateMachine;
 			GameObject* nearestBonus;
 			GameObject* exit;
+			PlayerGameObject* player;
 
 			GameWorld* worldRef;
 			Vector3 relativePos;

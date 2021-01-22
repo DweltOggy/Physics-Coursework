@@ -29,45 +29,64 @@ FollowEnemy::FollowEnemy(GameWorld* a)
 
 	State* harrasPlayer = new State([&](float dt) -> void
 		{
-
+			this->seekPlayer(dt);
 		}
 	);
 
 	
 	stateMachine->AddState(seekExit);
 	stateMachine->AddState(seekBonus);
+	stateMachine->AddState(harrasPlayer);
 
 	stateMachine->AddTransition(new StateTransition(seekExit, seekBonus,
 		[&]() -> bool
 		{
-			bool change = false;
-
+	
 			if (this->getScore() < scoreTolereance)
 			{
-				change = true;
 				nearestBonus = worldRef->closestBonus(this);
+				
+				if (nearestBonus == nullptr)
+					return false;
 
 				if((exit->GetTransform().GetPosition() - GetTransform().GetPosition()).Length() <
 					(nearestBonus->GetTransform().GetPosition() - GetTransform().GetPosition()).Length())
 				{
-					change = false;
+					return false;
 				}	
 
-				if (nearestBonus == nullptr)
-					change = false;
-
+				return true;
 			}
-			
-			return change;
+			return false;
 		}
 	));
 
 	stateMachine->AddTransition(new StateTransition(seekBonus, seekExit,
 		[&]() -> bool
 		{
-			bool change = false;
-			change = !nearestBonus->IsActive();
-			return change;
+			return !nearestBonus->IsActive();
+		}
+	));
+
+
+	stateMachine->AddTransition(new StateTransition(seekExit, harrasPlayer,
+		[&]() -> bool
+		{
+			if (player->getScore() > score &&
+				(player->GetTransform().GetPosition() - GetTransform().GetPosition()).Length() < 5.0f )
+				return true;
+			
+			return false;
+		}
+	));
+
+	stateMachine->AddTransition(new StateTransition(harrasPlayer, seekExit,
+		[&]() -> bool
+		{
+			if ((player->GetTransform().GetPosition() - GetTransform().GetPosition()).Length() > 5.0f)
+				return true;
+
+			return false;
 		}
 	));
 
@@ -101,8 +120,7 @@ void FollowEnemy::Update(float dt)
 
 void FollowEnemy::seekExit(float dt)
 {
-	relativePos =
-		exit->GetTransform().GetPosition() - GetTransform().GetPosition();
+	relativePos = exit->GetTransform().GetPosition() - GetTransform().GetPosition();
 
 	Vector3 offsetDir = relativePos.Normalised();
 
@@ -111,8 +129,7 @@ void FollowEnemy::seekExit(float dt)
 
 void FollowEnemy::seekBonus(float dt)
 {
-	relativePos =
-		nearestBonus->GetTransform().GetPosition() - GetTransform().GetPosition();
+	relativePos = nearestBonus->GetTransform().GetPosition() - GetTransform().GetPosition();
 
 	Vector3 offsetDir = relativePos.Normalised();
 
@@ -120,12 +137,11 @@ void FollowEnemy::seekBonus(float dt)
 }
 
 
-void FollowEnemy::seekBonus(float dt)
+void FollowEnemy::seekPlayer(float dt)
 {
-	//relativePos =
-	//	nearestBonus->GetTransform().GetPosition() - GetTransform().GetPosition();
+	relativePos = player->GetTransform().GetPosition() - GetTransform().GetPosition();
 
-	//Vector3 offsetDir = relativePos.Normalised();
+	Vector3 offsetDir = relativePos.Normalised();
 
-	//GetPhysicsObject()->AddForce(offsetDir * 100.0f);
+	GetPhysicsObject()->AddForce(offsetDir * 100.0f);
 }

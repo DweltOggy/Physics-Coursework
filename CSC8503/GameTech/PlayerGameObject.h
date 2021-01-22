@@ -9,6 +9,8 @@ namespace NCL
 		{
 		protected:
 			void OnCollisionBegin(GameObject* otherObject) override;
+			void OnCollisionEnd(GameObject* otherObject) override;
+
 			void Update(float dt) override;
 
 		public:
@@ -16,6 +18,7 @@ namespace NCL
 			float time = 0;
 			bool won;
 			bool lost;
+			float force;
 
 			int getScore()
 			{

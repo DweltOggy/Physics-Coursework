@@ -6,9 +6,17 @@ using namespace CSC8503;
 
 void MotorConstraint::UpdateConstraint(float dt)
 {
-	Vector3 Pos = objectA->GetTransform().GetPosition();
-
 	PhysicsObject* physA = objectA->GetPhysicsObject();
+	Vector3 AngVel = physA->GetAngularVelocity();
 
+	Vector3 motorForce = objectA->GetTransform().GetOrientation() * Vector3(0, 1.0f, 0);
+
+	if (AngVel != motorForce)
+	{
+		Vector3 difference = motorForce - AngVel;
+
+		Vector3 impulse = difference / physA->GetInverseMass();
+		physA->ApplyAngularImpulse(impulse);
+	}
 
 }

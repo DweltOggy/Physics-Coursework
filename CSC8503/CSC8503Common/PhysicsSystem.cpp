@@ -19,13 +19,14 @@ and the forces that are added to objects to change those positions
 
 */
 
-PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
+PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	
+{
 	applyGravity	= false;
 	useBroadPhase	= false;	
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
 	linearDamping	= 2.0f;
-	SetGravity(Vector3(0.0f, -100.0f, 0.0f));
+	SetGravity(Vector3(0.0f, -50.0f, 0.0f));
 }
 
 PhysicsSystem::~PhysicsSystem()	{
@@ -297,9 +298,6 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	
 	float jt = -(cFriction * Vector3::Dot(contactVelocity, tangent.Normalised()) / (totalMass + TangularEffect));
 
-
-	// -(Vector3::Dot(contactVelocity * cFriction, tangent)
-	// -(cFriction * Vector3::Dot( contactVelocity, tangent)
 	
 	Vector3 frictionImpulse = tangent.Normalised() * jt;
 	physA->ApplyLinearImpulse(-frictionImpulse);
